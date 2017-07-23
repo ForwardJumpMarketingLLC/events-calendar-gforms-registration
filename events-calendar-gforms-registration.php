@@ -12,5 +12,7 @@
  * @package         ForwardJump\EC_GF_Registration
  */
 
+namespace ForwardJump\EC_GF_Registration;
+
 require_once __DIR__ . '/vendor/CMB2/init.php';
 require_once __DIR__ . '/vendor/autoload.php';

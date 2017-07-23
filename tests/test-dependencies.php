@@ -5,10 +5,12 @@
  * @package ForwardJump\EC_GF_Registration
  */
 
+namespace ForwardJump\EC_GF_Registration;
+
 /**
  * Tests the presence of dependencies.
  */
-class ECGF_Dependencies extends WP_UnitTestCase {
+class ECGF_Dependencies extends \WP_UnitTestCase {
 
 	/**
 	 * Check for CMB2.
