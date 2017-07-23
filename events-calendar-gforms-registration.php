@@ -9,5 +9,8 @@
  * Domain Path:     /languages
  * Version:         0.1.0
  *
- * @package         ForwardJump\Events_Calendar_GForms_Registration
+ * @package         ForwardJump\EC_GF_Registration
  */
+
+require_once __DIR__ . '/vendor/CMB2/init.php';
+require_once __DIR__ . '/vendor/autoload.php';
