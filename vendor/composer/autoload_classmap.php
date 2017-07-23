@@ -6,4 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'ForwardJump\\EC_GF_Registration\\Display_Event_Registration_Form' => $baseDir . '/src/class-display-event-registration-form.php',
 );

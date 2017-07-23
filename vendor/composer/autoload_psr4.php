@@ -7,5 +7,4 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'ForwardJump\\EC_GF_Registration\\' => array($baseDir . '/src'),
-    'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
 );

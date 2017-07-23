@@ -4,16 +4,12 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit9d39079649d4b9b52b66a06c41f79554
+class ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b
 {
     public static $prefixLengthsPsr4 = array (
         'F' => 
         array (
             'ForwardJump\\EC_GF_Registration\\' => 31,
-        ),
-        'C' => 
-        array (
-            'Composer\\Installers\\' => 20,
         ),
     );
 
@@ -22,17 +18,18 @@ class ComposerStaticInit9d39079649d4b9b52b66a06c41f79554
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
-        'Composer\\Installers\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
-        ),
+    );
+
+    public static $classMap = array (
+        'ForwardJump\\EC_GF_Registration\\Display_Event_Registration_Form' => __DIR__ . '/../..' . '/src/class-display-event-registration-form.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit9d39079649d4b9b52b66a06c41f79554::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit9d39079649d4b9b52b66a06c41f79554::$prefixDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b::$classMap;
 
         }, null, ClassLoader::class);
     }
