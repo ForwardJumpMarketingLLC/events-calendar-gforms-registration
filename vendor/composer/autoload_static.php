@@ -22,6 +22,8 @@ class ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b
 
     public static $classMap = array (
         'ForwardJump\\EC_GF_Registration\\Display_Event_Registration_Form' => __DIR__ . '/../..' . '/src/class-display-event-registration-form.php',
+        'ForwardJump\\EC_GF_Registration\\Extend_Gravity_Form' => __DIR__ . '/../..' . '/src/class-extend-gravity-form.php',
+        'ForwardJump\\EC_GF_Registration\\Post_Metabox' => __DIR__ . '/../..' . '/src/class-post-metabox.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
