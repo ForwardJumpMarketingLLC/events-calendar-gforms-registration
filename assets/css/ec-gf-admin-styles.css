@@ -1,0 +1,17 @@
+.cmb-td.ajaxing .cmb2_select {
+    background: url('/wp-includes/images/wpspin-2x.gif') no-repeat;
+    background-size: contain;
+}
+
+.cmb-row.cmb-remove-field-row {
+    display: none;
+}
+
+.cmb-type-group .cmb-repeatable-group:not(:last-of-type),
+.cmb-type-group .cmb-row:not(:last-of-type),
+.cmb2-postbox .cmb-repeatable-group:not(:last-of-type),
+.cmb2-postbox .cmb-row:not(:last-of-type) {
+    border-bottom: none !important;
+}
+
+
