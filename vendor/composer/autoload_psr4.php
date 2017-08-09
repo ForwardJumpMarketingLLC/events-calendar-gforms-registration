@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'ForwardJump\\EC_GF_Registration\\' => array($baseDir . '/src'),
+    'ForwardJump\\ECGF_Registration\\' => array($baseDir . '/src'),
 );
