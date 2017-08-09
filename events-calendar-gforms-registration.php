@@ -8,17 +8,17 @@
  * https://forwardjump.com Text Domain:     events-calendar-gforms-registration
  * Domain Path:     /languages Version:         0.1.0
  *
- * @package         ForwardJump\EC_GF_Registration
+ * @package         ForwardJump\ECGF_Registration
  */
 
-namespace ForwardJump\EC_GF_Registration;
+namespace ForwardJump\ECGF_Registration;
 
 $constants = [
-	'EC_GF_DIR'             => __DIR__,
-	'EC_GF_PATH'            => __FILE__,
-	'EC_GF_URL'             => plugins_url( null, __FILE__ ),
-	'EC_GF_CONFIG_DIR'      => __DIR__ . '/config',
-	'EC_GF_DIR_TEXT_DOMAIN' => 'events-calendar-gforms-registration'
+	'ECGF_DIR'             => __DIR__,
+	'ECGF_PATH'            => __FILE__,
+	'ECGF_URL'             => plugins_url( null, __FILE__ ),
+	'ECGF_CONFIG_DIR'      => __DIR__ . '/config',
+	'ECGF_DIR_TEXT_DOMAIN' => 'events-calendar-gforms-registration'
 ];
 
 /**
@@ -33,10 +33,11 @@ array_walk( $constants, function ( $value, $constant ) {
 } );
 
 if ( is_admin() ) {
-	require_once EC_GF_DIR . '/vendor/CMB2/init.php';
-	require_once EC_GF_DIR . '/src/functions.php';
+	require_once ECGF_DIR . '/vendor/CMB2/init.php';
+	require_once ECGF_DIR . '/src/admin-functions.php';
 }
 
-require_once EC_GF_DIR . '/vendor/autoload.php';
+require_once ECGF_DIR . '/vendor/autoload.php';
+require_once ECGF_DIR . '/src/frontend-functions.php';
 
 
