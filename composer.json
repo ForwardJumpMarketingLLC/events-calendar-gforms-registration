@@ -27,7 +27,7 @@
   },
   "autoload": {
     "psr-4": {
-      "ForwardJump\\EC_GF_Registration\\": "src/"
+      "ForwardJump\\ECGF_Registration\\": "src/"
     }
   }
 }
