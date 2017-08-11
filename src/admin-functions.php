@@ -11,7 +11,7 @@
 
 namespace ForwardJump\ECGF_Registration;
 
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\init' );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\event_metabox_init' );
 /**
  * Initializes the post metaboxes.
  *
@@ -19,7 +19,7 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\\init' );
  *
  * @return void
  */
-function init() {
+function event_metabox_init() {
 
 	$config = include_once ECGF_CONFIG_DIR . '/post-metabox-config.php';
 
@@ -95,7 +95,7 @@ function get_form_fields( $field ) {
 	return $fields_list;
 }
 
-add_action( 'wp_ajax_btu_get_gform_field_list', __NAMESPACE__ . '\\get_gform_fields' );
+add_action( 'wp_ajax_ecgf_get_gform_field_list', __NAMESPACE__ . '\\get_gform_fields' );
 /**
  * Gets an array of fields for the selected Gravity Form to pass to the AJAX
  * request.
