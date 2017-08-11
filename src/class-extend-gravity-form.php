@@ -33,11 +33,11 @@ class Extend_Gravity_Form {
 	protected $post_id = null;
 
 	/**
-	 * Event selected form id.
+	 * Event form id.
 	 *
 	 * @var null
 	 */
-	protected $event_selected_form_id = null;
+	protected $event_form_id = null;
 
 	/**
 	 * Event form settings.
@@ -78,9 +78,10 @@ class Extend_Gravity_Form {
 	 * @return bool|void
 	 */
 	public function init() {
-		add_filter( 'gform_pre_render', [ $this, 'modify_event_registration_form' ] );
+		add_action( 'wp', [ $this, 'set_properties' ] );
+		add_action( 'wp', [ $this, 'gform_hooks' ] );
 		add_filter( 'gform_pre_validation', [ $this, 'add_field_validation' ] );
-		add_action( 'gform_after_submission', [ $this, 'add_post_id_to_lead_detail' ] );
+		add_action( "gform_after_submission", [ $this, 'add_post_id_to_lead_detail' ], 10, 2 );
 	}
 
 	/**
@@ -89,11 +90,11 @@ class Extend_Gravity_Form {
 	 * @return bool
 	 */
 	public function set_properties() {
-		$this->post_id                = get_the_ID();
-		$this->event_selected_form_id = get_post_meta( $this->get_post_id(), 'ecgf_selected_form_id', true );
-		$this->event_form_settings    = get_post_meta( $this->get_post_id(), 'ecgf_form_settings', true );
+		$this->post_id             = $this->get_post_id();
+		$this->event_form_id       = $this->get_event_form_id();
+		$this->event_form_settings = $this->get_event_form_settings();
 
-		if ( empty( $this->event_selected_form_id ) || empty( $this->event_form_settings ) ) {
+		if ( empty( $this->event_form_id ) || empty( $this->event_form_settings ) ) {
 			return false;
 		}
 
@@ -110,89 +111,37 @@ class Extend_Gravity_Form {
 	 * @return null|int
 	 */
 	public function get_post_id() {
+		if ( ! $this->post_id ) {
+			$this->post_id = get_the_ID();
+		}
+
 		return $this->post_id;
 	}
 
 	/**
-	 * @param $form
+	 * Get the event Gravity Form id.
 	 *
-	 * @return array
+	 * @return null|string
 	 */
-	public function modify_event_registration_form( $form ) {
-		if ( ! tribe_is_event() || empty( $form ) ) {
-			return $form;
+	public function get_event_form_id() {
+		if ( ! $this->event_form_id ) {
+			get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
 		}
 
-		$this->set_properties();
-
-		if ( (int) $this->event_selected_form_id === (int) $form['id'] ) {
-			$form = $this->insert_registration_notice( $form );
-		}
-
-		return $form;
+		return $this->event_form_id;
 	}
 
 	/**
-	 * Adds the post ID to the lead detail table when the form is submitted on a
-	 * singular Tribe Events page.
+	 * Get the form settings.
 	 *
-	 * @since 0.1.0
-	 *
-	 * @param array $entry Form entry information.
+	 * @return null|array
 	 */
-	public function add_post_id_to_lead_detail( $entry ) {
-
-		if ( ! is_singular( 'tribe_events' ) || empty( (array) $entry ) ) {
-			return false;
+	public function get_event_form_settings() {
+		if ( ! $this->event_form_settings ) {
+			$this->event_form_settings = get_post_meta( $this->get_post_id(), 'ecgf_form_settings', true );
 		}
 
-		global $wpdb;
-
-		$wpdb->insert( "{$wpdb->prefix}rg_lead_detail",
-			[
-				'value'        => $this->get_post_id(),
-				'form_id'      => $entry['form_id'],
-				'lead_id'      => $entry['id'],
-				'field_number' => self::EVENT_ID_DB_KEY,
-			]
-		);
-
-		return $wpdb->__get( 'result' );
-	}
-
-	/**
-	 * Inserts an event registration notice above the appropriate form field.
-	 *
-	 * @param array $form The current form to be filtered.
-	 *
-	 * @return array
-	 */
-	protected function insert_registration_notice( $form ) {
-		$notice             = get_post_meta( $this->get_post_id(), 'ecgf_registration_notice', true );
-		$insert_above_field = isset( $this->event_form_settings[0]['field_id'] ) ? $this->event_form_settings[0]['field_id'] : null;
-
-		if ( ! $insert_above_field || ! $notice ) {
-			return $form;
-		}
-
-		$form_field_ids = array_column( (array) $form['fields'], 'id' );
-
-		$splice_position = array_search( (int) $insert_above_field, (array) $form_field_ids, true );
-
-		$notice = $this->update_registration_notice( $notice, $this->event_form_settings );
-
-		$new_field = \GF_Fields::create(
-			[
-				'id'       => 'ecgf_registration_notice',
-				'type'     => 'html',
-				'content'  => $notice,
-				'cssClass' => 'ecgf_registration_notice',
-			]
-		);
-
-		array_splice( $form['fields'], $splice_position, 0, [ $new_field ] );
-
-		return $form;
+		return $this->event_form_settings;
 	}
 
 	/**
@@ -200,7 +149,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return array
 	 */
-	protected function get_max_reservations() {
+	public function get_max_reservations() {
 		if ( ! empty( $this->max_reservations ) ) {
 			return $this->max_reservations;
 		}
@@ -213,7 +162,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return array
 	 */
-	protected function get_booked_reservations() {
+	public function get_booked_reservations() {
 
 		if ( $this->booked_reservations ) {
 			return $this->booked_reservations;
@@ -265,18 +214,81 @@ class Extend_Gravity_Form {
 			return $this->available_reservations;
 		}
 
-		if ( empty( $this->max_reservations ) ) {
+		if ( empty( $this->get_max_reservations() ) ) {
 			return [];
 		}
 
 		$booked_reservations = $this->get_booked_reservations();
 
 		foreach ( $this->max_reservations as $index => $max ) {
-			$booked = isset( $booked_reservations[ $index ] ) ? $booked_reservations[ $index ] : 0;
+			$booked                                 = isset( $booked_reservations[ $index ] ) ? $booked_reservations[ $index ] : 0;
 			$this->available_reservations[ $index ] = max( 0, ( $max - $booked ) );
 		}
 
 		return $this->available_reservations;
+	}
+
+	/**
+	 * Hook into the appropriate Gravity Form.
+	 *
+	 * @return void
+	 */
+	public function gform_hooks() {
+		if ( ! $this->event_form_id ) {
+			return;
+		}
+
+		add_filter( "gform_pre_render_{$this->event_form_id}", [ $this, 'modify_event_registration_form' ] );
+	}
+
+	/**
+	 * @param $form
+	 *
+	 * @return array
+	 */
+	public function modify_event_registration_form( $form ) {
+		if ( ! tribe_is_event() || empty( $form ) ) {
+			return $form;
+		}
+
+		$form = $this->insert_registration_notice( $form );
+
+		return $form;
+	}
+
+	/**
+	 * Inserts an event registration notice above the appropriate form field.
+	 *
+	 * @param array $form The current form to be filtered.
+	 *
+	 * @return array
+	 */
+	protected function insert_registration_notice( $form ) {
+		$notice             = get_post_meta( $this->get_post_id(), 'ecgf_registration_notice', true );
+		$insert_above_field = isset( $this->get_event_form_settings()[0]['field_id'] ) ? $this->get_event_form_settings()[0]['field_id'] : null;
+
+		if ( ! $insert_above_field || ! $notice ) {
+			return $form;
+		}
+
+		$form_field_ids = array_column( (array) $form['fields'], 'id' );
+
+		$splice_position = array_search( (int) $insert_above_field, (array) $form_field_ids, true );
+
+		$notice = $this->update_registration_notice( $notice, $this->get_event_form_settings() );
+
+		$new_field = \GF_Fields::create(
+			[
+				'id'       => 'ecgf_registration_notice',
+				'type'     => 'html',
+				'content'  => $notice,
+				'cssClass' => 'ecgf_registration_notice',
+			]
+		);
+
+		array_splice( $form['fields'], $splice_position, 0, [ $new_field ] );
+
+		return $form;
 	}
 
 	/**
@@ -320,7 +332,8 @@ class Extend_Gravity_Form {
 	}
 
 	/**
-	 * Adds a validation filter to forms that are being used for event registration.
+	 * Adds a validation filter to forms that are being used for event
+	 * registration.
 	 *
 	 * @param array $form The current form to be filtered.
 	 *
@@ -331,7 +344,7 @@ class Extend_Gravity_Form {
 			return $form;
 		}
 
-		$this->set_properties();
+		$form_settings = $this->get_event_form_settings();
 
 		foreach ( (array) $this->event_form_settings as $field ) {
 			add_filter( "gform_field_validation_{$form['id']}_{$field['field_id']}", [ $this, 'validate_reservation_request' ], 10, 4 );
@@ -341,7 +354,8 @@ class Extend_Gravity_Form {
 	}
 
 	/**
-	 * Validate the reservation request to make sure the max number is not exceeded.
+	 * Validate the reservation request to make sure the max number is not
+	 * exceeded.
 	 *
 	 * @param array  $result Validation result.
 	 * @param string $value  Form field value.
@@ -354,7 +368,8 @@ class Extend_Gravity_Form {
 
 		if ( 1 > (int) $value ) {
 			$result['is_valid'] = false;
-			$result['message'] = 'Please enter a valid number.';
+			$result['message']  = 'Please enter a valid number.';
+
 			return $result;
 		}
 
@@ -376,5 +391,38 @@ class Extend_Gravity_Form {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Adds the post ID to the lead detail table when the form is submitted on a
+	 * singular Tribe Events page.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $entry Form entry information.
+	 * @param array $form  The current form to be filtered.
+	 *
+	 * @return bool
+	 */
+	public function add_post_id_to_lead_detail( $entry, $form ) {
+
+		if ( ! is_singular( 'tribe_events' ) || empty( (array) $entry ) ) {
+			return false;
+		}
+
+		if ( (int) $this->get_event_form_id() !== (int) $form['id'] )
+
+			global $wpdb;
+
+		$wpdb->insert( "{$wpdb->prefix}rg_lead_detail",
+			[
+				'value'        => $this->get_post_id(),
+				'form_id'      => $entry['form_id'],
+				'lead_id'      => $entry['id'],
+				'field_number' => self::EVENT_ID_DB_KEY,
+			]
+		);
+
+		return (bool) $wpdb->__get( 'result' );
 	}
 }
