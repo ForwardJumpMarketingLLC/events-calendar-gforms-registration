@@ -17,10 +17,9 @@ class ECGF_Dependencies extends \WP_UnitTestCase {
 
 		set_current_screen( 'edit-post' );
 
-		// Require the plugin bootstrap file so that the CMB2 dependency
-		// is read into memory.
-		require ECGF_PATH;
-		$cmb_init = \CMB2_Bootstrap_224::initiate();
+		load_admin_files();
+
+		$cmb_init = \CMB2_Bootstrap_2252::initiate();
 		$cmb_init->include_cmb();
 	}
 
