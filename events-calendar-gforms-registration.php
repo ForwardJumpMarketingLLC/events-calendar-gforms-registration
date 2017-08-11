@@ -13,29 +13,27 @@
 
 namespace ForwardJump\ECGF_Registration;
 
-$constants = [
-	'ECGF_DIR'             => __DIR__,
-	'ECGF_PATH'            => __FILE__,
-	'ECGF_URL'             => plugins_url( null, __FILE__ ),
-	'ECGF_CONFIG_DIR'      => __DIR__ . '/config',
-	'ECGF_DIR_TEXT_DOMAIN' => 'events-calendar-gforms-registration'
-];
+define( 'ECGF_DIR', __DIR__ );
+define( 'ECGF_PATH', __FILE__ );
+define( 'ECGF_URL', plugins_url( null, __FILE__ ) );
+define( 'ECGF_CONFIG_DIR', __DIR__ . '/config' );
+define( 'ECGF_DIR_TEXT_DOMAIN', 'events-calendar-gforms-registration' );
 
 /**
- * Define our constants.
+ * Loads admin files.
+ *
+ * @return void
  */
-array_walk( $constants, function ( $value, $constant ) {
-
-	if ( ! defined( $constant ) ) {
-		define( $constant, $value );
+function load_admin_files() {
+	if ( ! is_admin() ) {
+		return;
 	}
 
-} );
-
-if ( is_admin() ) {
 	require_once ECGF_DIR . '/vendor/CMB2/init.php';
 	require_once ECGF_DIR . '/src/admin-functions.php';
 }
+
+load_admin_files();
 
 require_once ECGF_DIR . '/vendor/autoload.php';
 require_once ECGF_DIR . '/src/frontend-functions.php';
