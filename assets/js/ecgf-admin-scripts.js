@@ -12,7 +12,7 @@
       }
 
       function setFormFieldsSelectors() {
-        formFieldsSelector = $('.cmb2-id-ecgf-form-fields select');
+        formFieldsSelector = $('.cmb2-id-ecgf-form-settings select');
       }
 
       function formSelectListener() {
@@ -28,7 +28,7 @@
         selectedFormId = $(this).val();
 
         data = {
-          'action': 'btu_get_gform_field_list',
+          'action': 'ecgf_get_gform_field_list',
           'formId': selectedFormId,
         };
 
