@@ -27,7 +27,7 @@ return [
 		'fields'  => [
 			[
 				'name'       => 'Select Registration Form',
-				'id'         => 'ecgf_selected_form_id',
+				'id'         => 'ecgf_form_id',
 				'type'       => 'select',
 				'options_cb' => 'ForwardJump\ECGF_Registration\get_forms',
 			],
