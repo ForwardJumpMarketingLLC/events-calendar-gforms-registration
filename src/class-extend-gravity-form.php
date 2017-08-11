@@ -125,7 +125,7 @@ class Extend_Gravity_Form {
 	 */
 	public function get_event_form_id() {
 		if ( ! $this->event_form_id ) {
-			get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
+			$this->event_form_id = get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
 		}
 
 		return $this->event_form_id;
@@ -154,7 +154,9 @@ class Extend_Gravity_Form {
 			return $this->max_reservations;
 		}
 
-		return $this->transform_array( $this->event_form_settings, 'field_id', 'max_reservations' );
+		$this->max_reservations = $this->transform_array( $this->event_form_settings, 'field_id', 'max_reservations' );
+
+		return $this->max_reservations;
 	}
 
 	/**
@@ -234,11 +236,13 @@ class Extend_Gravity_Form {
 	 * @return void
 	 */
 	public function gform_hooks() {
-		if ( ! $this->event_form_id ) {
+		$form_id = $this->get_event_form_id();
+
+		if ( ! $form_id ) {
 			return;
 		}
 
-		add_filter( "gform_pre_render_{$this->event_form_id}", [ $this, 'modify_event_registration_form' ] );
+		add_filter( "gform_pre_render_{$form_id}", [ $this, 'modify_event_registration_form' ] );
 	}
 
 	/**
@@ -410,9 +414,11 @@ class Extend_Gravity_Form {
 			return false;
 		}
 
-		if ( (int) $this->get_event_form_id() !== (int) $form['id'] )
+		if ( (int) $this->get_event_form_id() !== (int) $form['id'] ) {
+			return;
+		}
 
-			global $wpdb;
+		global $wpdb;
 
 		$wpdb->insert( "{$wpdb->prefix}rg_lead_detail",
 			[
