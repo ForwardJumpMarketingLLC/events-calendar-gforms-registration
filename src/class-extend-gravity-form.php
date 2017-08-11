@@ -33,6 +33,13 @@ class Extend_Gravity_Form {
 	protected $post_id = null;
 
 	/**
+	 * Event selected form id.
+	 *
+	 * @var null
+	 */
+	protected $event_selected_form_id = null;
+
+	/**
 	 * Event form settings.
 	 *
 	 * @var array
@@ -63,22 +70,7 @@ class Extend_Gravity_Form {
 	/**
 	 * Extend_Gravity_Form constructor.
 	 */
-	public function __construct() {
-		$this->set_properties();
-	}
-
-	/**
-	 * Set the post_id variable to the ID of the current post.
-	 *
-	 * @return false|int
-	 */
-	protected function set_properties() {
-		$this->post_id                = get_the_ID();
-		$this->event_form_settings    = get_post_meta( $this->get_post_id(), 'ecgf_form_settings', true );
-		$this->max_reservations       = $this->get_max_reservations();
-		$this->booked_reservations    = $this->get_booked_reservations();
-		$this->available_reservations = $this->get_available_reservations();
-	}
+	public function __construct() {}
 
 	/**
 	 * Hooks into Gravity Forms to modify the form.
@@ -86,16 +78,30 @@ class Extend_Gravity_Form {
 	 * @return bool|void
 	 */
 	public function init() {
-		if ( empty( (array) $this->event_form_settings ) ) {
+		add_filter( 'gform_pre_render', [ $this, 'modify_event_registration_form' ] );
+		add_filter( 'gform_pre_validation', [ $this, 'add_field_validation' ] );
+		add_action( 'gform_after_submission', [ $this, 'add_post_id_to_lead_detail' ] );
+	}
+
+	/**
+	 * Sets the class properties.
+	 *
+	 * @return bool
+	 */
+	public function set_properties() {
+		$this->post_id                = get_the_ID();
+		$this->event_selected_form_id = get_post_meta( $this->get_post_id(), 'ecgf_selected_form_id', true );
+		$this->event_form_settings    = get_post_meta( $this->get_post_id(), 'ecgf_form_settings', true );
+
+		if ( empty( $this->event_selected_form_id ) || empty( $this->event_form_settings ) ) {
 			return false;
 		}
 
-		add_filter( 'gform_pre_render', [ $this, 'modify_event_registration_form' ] );
-		add_filter( 'gform_pre_validation', [ $this, 'add_validation_filter_to_event_reservations' ] );
-	}
+		$this->max_reservations       = $this->get_max_reservations();
+		$this->booked_reservations    = $this->get_booked_reservations();
+		$this->available_reservations = $this->get_available_reservations();
 
-	public function add_validation_filter_to_event_reservations() {
-		return false;
+		return true;
 	}
 
 	/**
@@ -113,11 +119,15 @@ class Extend_Gravity_Form {
 	 * @return array
 	 */
 	public function modify_event_registration_form( $form ) {
-		if ( ! tribe_is_event() || ! $form ) {
+		if ( ! tribe_is_event() || empty( $form ) ) {
 			return $form;
 		}
 
-		$form = $this->insert_registration_notice( $form );
+		$this->set_properties();
+
+		if ( (int) $this->event_selected_form_id === (int) $form['id'] ) {
+			$form = $this->insert_registration_notice( $form );
+		}
 
 		return $form;
 	}
@@ -130,7 +140,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @param array $entry Form entry information.
 	 */
-	public static function add_post_id_to_lead_detail( $entry ) {
+	public function add_post_id_to_lead_detail( $entry ) {
 
 		if ( ! is_singular( 'tribe_events' ) || empty( (array) $entry ) ) {
 			return false;
@@ -140,14 +150,14 @@ class Extend_Gravity_Form {
 
 		$wpdb->insert( "{$wpdb->prefix}rg_lead_detail",
 			[
-				'value'        => get_the_ID(),
+				'value'        => $this->get_post_id(),
 				'form_id'      => $entry['form_id'],
 				'lead_id'      => $entry['id'],
 				'field_number' => self::EVENT_ID_DB_KEY,
 			]
 		);
 
-		return $wpdb->result;
+		return $wpdb->__get( 'result' );
 	}
 
 	/**
@@ -259,12 +269,11 @@ class Extend_Gravity_Form {
 			return [];
 		}
 
-		if ( empty( $this->get_booked_reservations() ) ) {
-			return (array) $max_reservations;
-		}
+		$booked_reservations = $this->get_booked_reservations();
 
 		foreach ( $this->max_reservations as $index => $max ) {
-			$this->available_reservations[ $index ] = max( 0, ( $max - $this->get_booked_reservations()[ $index ] ) );
+			$booked = isset( $booked_reservations[ $index ] ) ? $booked_reservations[ $index ] : 0;
+			$this->available_reservations[ $index ] = max( 0, ( $max - $booked ) );
 		}
 
 		return $this->available_reservations;
@@ -308,5 +317,64 @@ class Extend_Gravity_Form {
 		$updated_message = str_replace( (array) $search_strings, (array) $remaining_slots, $message );
 
 		return '<span>' . $updated_message . '</span>';
+	}
+
+	/**
+	 * Adds a validation filter to forms that are being used for event registration.
+	 *
+	 * @param array $form The current form to be filtered.
+	 *
+	 * @return array
+	 */
+	public function add_field_validation( $form ) {
+		if ( ! tribe_is_event() ) {
+			return $form;
+		}
+
+		$this->set_properties();
+
+		foreach ( (array) $this->event_form_settings as $field ) {
+			add_filter( "gform_field_validation_{$form['id']}_{$field['field_id']}", [ $this, 'validate_reservation_request' ], 10, 4 );
+		}
+
+		return $form;
+	}
+
+	/**
+	 * Validate the reservation request to make sure the max number is not exceeded.
+	 *
+	 * @param array  $result Validation result.
+	 * @param string $value  Form field value.
+	 * @param array  $form   Form The current form to be filtered.
+	 * @param object $field  Form field data.
+	 *
+	 * @return mixed
+	 */
+	public function validate_reservation_request( $result, $value, $form, $field ) {
+
+		if ( 1 > (int) $value ) {
+			$result['is_valid'] = false;
+			$result['message'] = 'Please enter a valid number.';
+			return $result;
+		}
+
+		$remaining_reservations = isset( $this->available_reservations[ $field->id ] ) ? $this->available_reservations[ $field->id ] : null;
+
+		if ( is_null( $remaining_reservations ) ) {
+			return $result;
+		}
+
+		$result['is_valid'] = ( (int) $value <= $remaining_reservations );
+
+		if ( ! $result['is_valid'] ) {
+
+			if ( 0 === (int) $remaining_reservations ) {
+				$result['message'] = 'Sorry, there are no more seats available.';
+			} else {
+				$result['message'] = "Please enter a value up to {$remaining_reservations}";
+			}
+		}
+
+		return $result;
 	}
 }
