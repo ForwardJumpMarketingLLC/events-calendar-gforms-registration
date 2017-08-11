@@ -79,7 +79,7 @@ function get_forms() {
  */
 function get_form_fields( $field ) {
 
-	$form_id = get_post_meta( get_the_ID(), 'ecgf_selected_form_id', true );
+	$form_id = get_post_meta( get_the_ID(), 'ecgf_form_id', true );
 
 	if ( false === (bool) $form_id ) {
 		return false;
