@@ -4,11 +4,11 @@
 
       var formIdSelector = {},
           formFieldsSelector = {},
-          selectedFormId,
+          formId,
           data;
 
       function setFormIdSelector() {
-        formIdSelector = $('.cmb2-id-ecgf-selected-form-id');
+        formIdSelector = $('.cmb2-id-ecgf-form-id');
       }
 
       function setFormFieldsSelectors() {
@@ -16,7 +16,7 @@
       }
 
       function formSelectListener() {
-        formIdSelector.on('change', '#ecgf_selected_form_id', ajaxUpdate);
+        formIdSelector.on('change', '#ecgf_form_id', ajaxUpdate);
       }
 
       function ajaxUpdate() {
@@ -25,11 +25,11 @@
         $(formFieldsSelector).empty();
         $(formFieldsSelector).parent().addClass('ajaxing');
 
-        selectedFormId = $(this).val();
+        formId = $(this).val();
 
         data = {
           'action': 'ecgf_get_gform_field_list',
-          'formId': selectedFormId,
+          'formId': formId,
         };
 
         $.ajax({
