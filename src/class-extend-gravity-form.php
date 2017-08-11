@@ -79,9 +79,7 @@ class Extend_Gravity_Form {
 	 */
 	public function init() {
 		add_action( 'wp', [ $this, 'set_properties' ] );
-		add_action( 'wp', [ $this, 'gform_hooks' ] );
-		add_filter( 'gform_pre_validation', [ $this, 'add_field_validation' ] );
-		add_action( "gform_after_submission", [ $this, 'add_post_id_to_lead_detail' ], 10, 2 );
+		add_action( 'wp', [ $this, 'gform_hooks' ], 5 );
 	}
 
 	/**
@@ -236,28 +234,24 @@ class Extend_Gravity_Form {
 	 * @return void
 	 */
 	public function gform_hooks() {
+		if ( ! is_singular( 'tribe_events' ) ) {
+			return;
+		}
+
 		$form_id = $this->get_event_form_id();
 
 		if ( ! $form_id ) {
 			return;
 		}
 
-		add_filter( "gform_pre_render_{$form_id}", [ $this, 'modify_event_registration_form' ] );
-	}
+		add_filter( "gform_pre_render_{$form_id}", [ $this, 'insert_registration_notice' ] );
 
-	/**
-	 * @param $form
-	 *
-	 * @return array
-	 */
-	public function modify_event_registration_form( $form ) {
-		if ( ! tribe_is_event() || empty( $form ) ) {
-			return $form;
+		$form_settings = $this->get_event_form_settings();
+		foreach ( (array) $form_settings as $field ) {
+			add_filter( "gform_field_validation_{$form_id}_{$field['field_id']}", [ $this, 'validate_reservation_request' ], 10, 4 );
 		}
 
-		$form = $this->insert_registration_notice( $form );
-
-		return $form;
+		add_action( "gform_after_submission_{$form_id}", [ $this, 'add_post_id_to_lead_detail' ], 10, 2 );
 	}
 
 	/**
@@ -267,7 +261,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return array
 	 */
-	protected function insert_registration_notice( $form ) {
+	public function insert_registration_notice( $form ) {
 		$notice             = get_post_meta( $this->get_post_id(), 'ecgf_registration_notice', true );
 		$insert_above_field = isset( $this->get_event_form_settings()[0]['field_id'] ) ? $this->get_event_form_settings()[0]['field_id'] : null;
 
@@ -291,68 +285,6 @@ class Extend_Gravity_Form {
 		);
 
 		array_splice( $form['fields'], $splice_position, 0, [ $new_field ] );
-
-		return $form;
-	}
-
-	/**
-	 * Converts the key value pair for the input array.
-	 *
-	 * @param array  $array Input array to be transformed.
-	 * @param string $key   Array value that should be converted to the key.
-	 * @param string $value Array value in the new key value pair.
-	 *
-	 * @return array
-	 */
-	protected function transform_array( $array, $key, $value ) {
-		$keys   = array_column( (array) $array, $key );
-		$values = array_column( (array) $array, $value );
-
-		$array = array_combine( $keys, $values );
-
-		return $array;
-	}
-
-	/**
-	 * Update the event registration notice.
-	 *
-	 * @param string $message Message to be displayed.
-	 * @param array  $fields  Field data.
-	 *
-	 * @return string
-	 */
-	protected function update_registration_notice( $message, $fields ) {
-		$remaining_slots  = (array) $this->get_available_reservations();
-		$number_of_fields = count( $remaining_slots );
-
-		$search_strings = [];
-		for ( $i = 1; $i <= $number_of_fields; $i ++ ) {
-			$search_strings[] = "{field_{$i}}";
-		}
-
-		$updated_message = str_replace( (array) $search_strings, (array) $remaining_slots, $message );
-
-		return '<span>' . $updated_message . '</span>';
-	}
-
-	/**
-	 * Adds a validation filter to forms that are being used for event
-	 * registration.
-	 *
-	 * @param array $form The current form to be filtered.
-	 *
-	 * @return array
-	 */
-	public function add_field_validation( $form ) {
-		if ( ! tribe_is_event() ) {
-			return $form;
-		}
-
-		$form_settings = $this->get_event_form_settings();
-
-		foreach ( (array) $this->event_form_settings as $field ) {
-			add_filter( "gform_field_validation_{$form['id']}_{$field['field_id']}", [ $this, 'validate_reservation_request' ], 10, 4 );
-		}
 
 		return $form;
 	}
@@ -430,5 +362,45 @@ class Extend_Gravity_Form {
 		);
 
 		return (bool) $wpdb->__get( 'result' );
+	}
+
+	/**
+	 * Converts the key value pair for the input array.
+	 *
+	 * @param array  $array Input array to be transformed.
+	 * @param string $key   Array value that should be converted to the key.
+	 * @param string $value Array value in the new key value pair.
+	 *
+	 * @return array
+	 */
+	protected function transform_array( $array, $key, $value ) {
+		$keys   = array_column( (array) $array, $key );
+		$values = array_column( (array) $array, $value );
+
+		$array = array_combine( $keys, $values );
+
+		return $array;
+	}
+
+	/**
+	 * Update the event registration notice.
+	 *
+	 * @param string $message Message to be displayed.
+	 * @param array  $fields  Field data.
+	 *
+	 * @return string
+	 */
+	protected function update_registration_notice( $message, $fields ) {
+		$remaining_slots  = (array) $this->get_available_reservations();
+		$number_of_fields = count( $remaining_slots );
+
+		$search_strings = [];
+		for ( $i = 1; $i <= $number_of_fields; $i ++ ) {
+			$search_strings[] = "{field_{$i}}";
+		}
+
+		$updated_message = str_replace( (array) $search_strings, (array) $remaining_slots, $message );
+
+		return '<span>' . $updated_message . '</span>';
 	}
 }
