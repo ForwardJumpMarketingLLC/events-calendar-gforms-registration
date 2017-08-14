@@ -112,7 +112,9 @@ function get_gform_fields() {
 			$options[ $field['id'] ] = $field['label'];
 		} else {
 			foreach ( $field['inputs'] as $input ) {
-				$options[ $input['id'] ] = $input['label'];
+				if ( empty( $input['isHidden'] ) ) {
+					$options[ $input['id'] ] = $input['label'];
+				}
 			}
 		}
 	}
