@@ -120,10 +120,10 @@ function get_gform_fields() {
  * @return array
  */
 function get_form_field_options( $form_id ) {
-	$fields = \GFFormsModel::get_form_meta( $form_id );
+	$form = \GFFormsModel::get_form_meta( $form_id );
 
-	$options = [ 'null' => 'None selected' ];
-	foreach ( $fields['fields'] as $field ) {
+	$options = [];
+	foreach ( $form['fields'] as $field ) {
 		if ( empty( $field['inputs'] ) ) {
 			$options[ $field['id'] ] = $field['label'];
 		} else {

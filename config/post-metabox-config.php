@@ -55,6 +55,7 @@ return [
 						'description' => 'Choose the form field that should be used to update the number of registrants.',
 						'id'          => 'field_id',
 						'type'        => 'select',
+						'show_option_none' => 'None selected',
 						'options_cb'  => 'ForwardJump\ECGF_Registration\get_form_fields',
 					],
 				],
