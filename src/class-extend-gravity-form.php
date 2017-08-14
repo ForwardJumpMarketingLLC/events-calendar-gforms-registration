@@ -247,7 +247,7 @@ class Extend_Gravity_Form {
 			return;
 		}
 
-		add_filter( "gform_pre_render_{$form_id}", [ $this, 'modify_form' ] );
+//		add_filter( "gform_pre_render_{$form_id}", [ $this, 'modify_form' ] );
 		add_filter( "gform_pre_submission_filter_{$form_id}", [ $this, 'modify_form' ]  );
 
 		add_filter( 'gform_entry_meta', function ($entry_meta, $form_id){
