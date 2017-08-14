@@ -79,7 +79,7 @@ abstract class CMB2_Type_Multi_Base extends CMB2_Type_Base {
 			: $field->get_default();
 
 		if ( is_numeric( $value ) ) {
-			$value = intval( $value );
+//			$value = intval( $value );
 		}
 
 		$concatenated_items = '';
