@@ -115,3 +115,49 @@ function get_gform_fields() {
 
 	wp_die();
 }
+
+add_action( 'gform_loaded', function() {
+//	$extend_gf = new Extend_Gravity_Form();
+//	$extend_gf->gform_hooks();
+} );
+
+add_filter( 'gform_entry_meta', function ($entry_meta, $form_id){
+//	return $entry_meta;
+	//data will be stored with the meta key named score
+	//label - entry list will use Score as the column header
+	//is_numeric - used when sorting the entry list, indicates whether the data should be treated as numeric when sorting
+	//is_default_column - when set to true automatically adds the column to the entry list, without having to edit and add the column for display
+	//update_entry_meta_callback - indicates what function to call to update the entry meta upon form submission or editing an entry
+
+	$entry_meta['event_id'] = array(
+		'label' => 'Event ID',
+		'is_numeric' => true,
+		'is_default_column' => true,
+		'value' => '2',
+	);
+
+	return $entry_meta;
+}, 10, 2);
+
+add_filter( 'gform_entries_column_filter', __NAMESPACE__ . '\\change_column_data', 10, 5 );
+function change_column_data( $value, $form_id, $field_id, $entry, $query_string ) {
+
+	if ( 'event_id' !== $field_id ) {
+		return $value;
+	}
+
+	return sprintf( '<a href="%s">%s</a>', get_the_permalink( $value ), $value . ' - ' .  get_the_title( $value ) );
+}
+
+add_filter( "gform_admin_pre_render", function( $form ) {
+	$new_field = \GF_Fields::create(
+		[
+			'id'                   => 888,
+			'type'                 => 'text',
+			'label'                => 'Event',
+		]
+	);
+
+	array_push( $form['fields'], $new_field );
+	return $form;
+} );

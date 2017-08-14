@@ -21,9 +21,9 @@ class Extend_Gravity_Form {
 	/**
 	 * The event id field number key used in the database.
 	 *
-	 * @var float
+	 * @var string
 	 */
-	const EVENT_ID_DB_KEY = 0.9999;
+	const EVENT_ID_DB_KEY = 'event_id';
 
 	/**
 	 * Post ID.
@@ -168,31 +168,34 @@ class Extend_Gravity_Form {
 			return $this->booked_reservations;
 		}
 
-		$field_number = self::EVENT_ID_DB_KEY;
+		$meta_key = self::EVENT_ID_DB_KEY;
 		$field_ids    = array_column(
 			(array) $this->event_form_settings,
 			'field_id'
 		);
 
 		$field_placeholders = implode( ', ', array_fill( 0, count( $field_ids ), '%s' ) );
-		$sql_variables      = array_merge( (array) $field_ids, (array) $field_number, (array) $this->get_post_id() );
+		$sql_variables      = array_merge( (array) $meta_key, (array) $this->get_post_id(), (array) $field_ids );
 
 		global $wpdb;
 
 		$sql_statement
-			= "
-			SELECT ld1.field_number AS field_id, SUM(ld1.value) AS booked_reservations
+			= "			
+			SELECT ld.field_number as field_id, SUM(ld.value) AS booked_reservations
 			FROM {$wpdb->prefix}rg_lead_detail AS ld
-			INNER JOIN {$wpdb->prefix}rg_lead_detail AS ld1
-			ON ld1.lead_id = ld.lead_id 
-			AND ld1.field_number IN ( {$field_placeholders} )
-			INNER JOIN {$wpdb->prefix}rg_lead AS l 
+			INNER JOIN {$wpdb->prefix}rg_lead_meta AS lm
+			ON lm.lead_id = ld.lead_id
+			   AND lm.meta_key IN ( %s )
+			       AND lm.meta_value IN ( %s )
+			INNER JOIN {$wpdb->prefix}rg_lead AS l
 			ON l.id = ld.lead_id
-			AND l.status = 'active'
-			WHERE cast(ld.field_number as decimal(5,4)) = %f 
-			AND ld.value IN ( %s )
-			GROUP BY ld1.field_number
+			   AND l.status = 'active'
+			WHERE ld.field_number IN ( {$field_placeholders} )
+			GROUP BY ld.field_number
 		";
+
+//		CONVERT TO:
+
 
 		$booked_reservations = $wpdb->get_results( $wpdb->prepare( $sql_statement, $sql_variables ) );
 
@@ -244,14 +247,56 @@ class Extend_Gravity_Form {
 			return;
 		}
 
+		add_filter( "gform_pre_render_{$form_id}", [ $this, 'modify_form' ] );
+		add_filter( "gform_pre_submission_filter_{$form_id}", [ $this, 'modify_form' ]  );
+
+		add_filter( 'gform_entry_meta', function ($entry_meta, $form_id){
+			if ( $form_id !== $this->get_event_form_id() ) {
+				return $entry_meta;
+			}
+
+			$entry_meta['event_id'] = array(
+				'label' => 'Event ID',
+				'is_numeric' => true,
+				'update_entry_meta_callback' => [ $this, 'update_entry_meta' ],
+				'is_default_column' => true
+			);
+
+			return $entry_meta;
+		}, 10, 2);
+
 		add_filter( "gform_pre_render_{$form_id}", [ $this, 'insert_registration_notice' ] );
 
 		$form_settings = $this->get_event_form_settings();
 		foreach ( (array) $form_settings as $field ) {
 			add_filter( "gform_field_validation_{$form_id}_{$field['field_id']}", [ $this, 'validate_reservation_request' ], 10, 4 );
 		}
+	}
 
-		add_action( "gform_after_submission_{$form_id}", [ $this, 'add_post_id_to_lead_detail' ], 10, 2 );
+	public function update_entry_meta() {
+		return $this->get_post_id();
+	}
+
+	function modify_form( $form ) {
+
+		if ( (int) $this->get_event_form_id() !== (int) $form['id'] ) {
+			return $form;
+		}
+
+		if ( empty( $_POST['input_888'] ) ) {
+			$_POST['input_888'] = get_the_title( $this->get_post_id() );
+		}
+
+		$new_field = \GF_Fields::create(
+			[
+				'id'                   => 888,
+				'type'                 => 'text',
+				'label'                => 'Event',
+			]
+		);
+
+		array_push( $form['fields'], $new_field );
+		return $form;
 	}
 
 	/**
@@ -334,37 +379,9 @@ class Extend_Gravity_Form {
 	}
 
 	/**
-	 * Adds the post ID to the lead detail table when the form is submitted on a
-	 * singular Tribe Events page.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param array $entry Form entry information.
-	 * @param array $form  The current form to be filtered.
-	 *
-	 * @return bool
-	 */
-	public function add_post_id_to_lead_detail( $entry, $form ) {
-		if ( empty( $entry ) ) {
-			return false;
-		}
-
-		global $wpdb;
-
-		$wpdb->insert( "{$wpdb->prefix}rg_lead_detail",
-			[
-				'value'        => $this->get_post_id(),
-				'form_id'      => $entry['form_id'],
-				'lead_id'      => $entry['id'],
-				'field_number' => self::EVENT_ID_DB_KEY,
-			]
-		);
-
-		return (bool) $wpdb->__get( 'result' );
-	}
-
-	/**
 	 * Converts the key value pair for the input array.
+	 *
+	 * @todo Fix bug where zero values are stripped out.
 	 *
 	 * @param array  $array Input array to be transformed.
 	 * @param string $key   Array value that should be converted to the key.
@@ -376,9 +393,9 @@ class Extend_Gravity_Form {
 		$keys   = array_column( (array) $array, $key );
 		$values = array_column( (array) $array, $value );
 
-		$array = array_combine( $keys, $values );
+		$transformed_array = array_combine( $keys, $values );
 
-		return $array;
+		return $transformed_array;
 	}
 
 	/**
