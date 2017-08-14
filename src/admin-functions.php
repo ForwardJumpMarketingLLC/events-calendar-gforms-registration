@@ -108,7 +108,13 @@ function get_gform_fields() {
 
 	$options = [ 'null' => 'None selected' ];
 	foreach ( $fields['fields'] as $field ) {
-		$options[ $field['id'] ] = $field['label'];
+		if ( empty( $field['inputs'] ) ) {
+			$options[ $field['id'] ] = $field['label'];
+		} else {
+			foreach ( $field['inputs'] as $input ) {
+				$options[ $input['id'] ] = $input['label'];
+			}
+		}
 	}
 
 	echo json_encode( $options );
