@@ -181,7 +181,7 @@ class Extend_Gravity_Form {
 
 		$sql_statement
 			= "			
-			SELECT ld.field_number as field_id, SUM(ld.value) AS booked_reservations
+			SELECT ld.field_number as field_id, COUNT(ld.value) AS booked_reservations
 			FROM {$wpdb->prefix}rg_lead_detail AS ld
 			INNER JOIN {$wpdb->prefix}rg_lead_meta AS lm
 			ON lm.lead_id = ld.lead_id
@@ -190,7 +190,7 @@ class Extend_Gravity_Form {
 			INNER JOIN {$wpdb->prefix}rg_lead AS l
 			ON l.id = ld.lead_id
 			   AND l.status = 'active'
-			WHERE ld.field_number IN ( {$field_placeholders} )
+			WHERE CAST( ld.field_number AS DECIMAL(5,2) ) IN ( {$field_placeholders} )
 			GROUP BY ld.field_number
 		";
 
