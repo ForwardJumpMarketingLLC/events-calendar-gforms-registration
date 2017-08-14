@@ -158,6 +158,10 @@ function change_column_data( $value, $form_id, $field_id, $entry, $query_string 
 }
 
 add_filter( "gform_admin_pre_render", function( $form ) {
+	if ( 'toplevel_page_gf_edit_forms' === get_current_screen()->id ) {
+		return $form;
+	}
+
 	$new_field = \GF_Fields::create(
 		[
 			'id'                   => 888,
