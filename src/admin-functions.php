@@ -85,25 +85,41 @@ function get_form_fields( $field ) {
 		return false;
 	}
 
-	$form = \GFFormsModel::get_form_meta( $form_id );
+	$options = get_form_field_options( $form_id );
 
-	$fields_list = [ 'null' => 'None selected' ];
-	foreach ( $form['fields'] as $field ) {
-		$fields_list[ $field->id ] = $field->label;
-	}
-
-	return $fields_list;
+	return $options;
 }
 
 add_action( 'wp_ajax_ecgf_get_gform_field_list', __NAMESPACE__ . '\\get_gform_fields' );
 /**
  * Gets an array of fields for the selected Gravity Form to pass to the AJAX
  * request.
+ *
+ * @return bool|void
  */
 function get_gform_fields() {
 
 	$form_id = intval( $_POST['formId'] );
 
+	if ( false === (bool) $form_id ) {
+		return false;
+	}
+
+	$options = get_form_field_options( $form_id );
+
+	echo json_encode( $options );
+
+	wp_die();
+}
+
+/**
+ * Return a keyed array of field options for the specified Gravity Form.
+ *
+ * @param int $form_id
+ *
+ * @return array
+ */
+function get_form_field_options( $form_id ) {
 	$fields = \GFFormsModel::get_form_meta( $form_id );
 
 	$options = [ 'null' => 'None selected' ];
@@ -119,9 +135,7 @@ function get_gform_fields() {
 		}
 	}
 
-	echo json_encode( $options );
-
-	wp_die();
+	return $options;
 }
 
 add_action( 'gform_loaded', function() {
