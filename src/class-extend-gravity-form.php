@@ -190,7 +190,7 @@ class Extend_Gravity_Form {
 			INNER JOIN {$wpdb->prefix}rg_lead AS l
 			ON l.id = ld.lead_id
 			   AND l.status = 'active'
-			WHERE CAST( ld.field_number AS DECIMAL(5,2) ) IN ( {$field_placeholders} )
+			WHERE CAST( ld.field_number AS DECIMAL(6,2) ) IN ( {$field_placeholders} )
 			GROUP BY ld.field_number
 		";
 
