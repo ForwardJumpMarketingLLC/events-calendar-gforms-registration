@@ -88,6 +88,10 @@ class Extend_Gravity_Form {
 	 * @return bool
 	 */
 	public function set_properties() {
+		if ( ! tribe_is_event() || tribe_is_past_event() ) {
+			return false;
+		}
+
 		$this->post_id             = $this->get_post_id();
 		$this->event_form_id       = $this->get_event_form_id();
 		$this->event_form_settings = $this->get_event_form_settings();
@@ -194,9 +198,6 @@ class Extend_Gravity_Form {
 			GROUP BY ld.field_number
 		";
 
-//		CONVERT TO:
-
-
 		$booked_reservations = $wpdb->get_results( $wpdb->prepare( $sql_statement, $sql_variables ) );
 
 		$this->booked_reservations = $this->transform_array( $booked_reservations, 'field_id', 'booked_reservations' );
@@ -237,7 +238,7 @@ class Extend_Gravity_Form {
 	 * @return void
 	 */
 	public function gform_hooks() {
-		if ( ! is_singular( 'tribe_events' ) ) {
+		if ( ! tribe_is_event() || tribe_is_past_event() ) {
 			return;
 		}
 
@@ -247,7 +248,6 @@ class Extend_Gravity_Form {
 			return;
 		}
 
-//		add_filter( "gform_pre_render_{$form_id}", [ $this, 'modify_form' ] );
 		add_filter( "gform_pre_submission_filter_{$form_id}", [ $this, 'modify_form' ]  );
 
 		add_filter( 'gform_entry_meta', function ($entry_meta, $form_id){
@@ -269,7 +269,8 @@ class Extend_Gravity_Form {
 
 		$form_settings = $this->get_event_form_settings();
 		foreach ( (array) $form_settings as $field ) {
-			add_filter( "gform_field_validation_{$form_id}_{$field['field_id']}", [ $this, 'validate_reservation_request' ], 10, 4 );
+			$field_id = floor( $field['field_id'] );
+			add_filter( "gform_field_validation_{$form_id}_{$field_id}", [ $this, 'validate_reservation_request' ], 10, 4 );
 		}
 	}
 
@@ -338,6 +339,8 @@ class Extend_Gravity_Form {
 	 * Validate the reservation request to make sure the max number is not
 	 * exceeded.
 	 *
+	 * @TODO refactor logic for determining available reservations for complex fields.
+	 *
 	 * @param array  $result Validation result.
 	 * @param string $value  Form field value.
 	 * @param array  $form   Form The current form to be filtered.
@@ -347,18 +350,22 @@ class Extend_Gravity_Form {
 	 */
 	public function validate_reservation_request( $result, $value, $form, $field ) {
 
-		if ( empty( $value ) ) {
+		if ( isset( $result['is_valid'] ) && false === (bool) $result['is_valid'] || empty( $value ) ) {
 			return $result;
 		}
 
-		if ( 1 > (int) $value ) {
-			$result['is_valid'] = false;
-			$result['message']  = 'Please enter a valid number.';
+		$available_reservations = null;
+		if ( is_array( $value ) ) {
+			$value = array_filter( $value );
 
-			return $result;
+			if ( ! empty( $value ) ) {
+				$keys = array_keys( $value );
+				$available_reservations = isset( $this->get_available_reservations()[ $keys[0] ] ) ? $this->get_available_reservations()[ $keys[0] ] : null;
+			}
+
+		} else {
+			$available_reservations = isset( $this->get_available_reservations()[ $field->id ] ) ? $this->get_available_reservations()[ $field->id ] : null;
 		}
-
-		$available_reservations = isset( $this->get_available_reservations()[ $field->id ] ) ? $this->get_available_reservations()[ $field->id ] : null;
 
 		if ( is_null( $available_reservations ) ) {
 			return $result;
@@ -380,8 +387,6 @@ class Extend_Gravity_Form {
 
 	/**
 	 * Converts the key value pair for the input array.
-	 *
-	 * @todo Fix bug where zero values are stripped out.
 	 *
 	 * @param array  $array Input array to be transformed.
 	 * @param string $key   Array value that should be converted to the key.
