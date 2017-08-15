@@ -32,6 +32,11 @@ add_action( 'tribe_events_single_event_after_the_meta', __NAMESPACE__ . '\\rende
  * @return void
  */
 function render_gravity_form() {
+
+	if ( tribe_is_past_event() ) {
+		return;
+	}
+
 	$gform_id = get_post_meta( get_the_ID(), 'ecgf_form_id', true );
 
 	if ( ! $gform_id ) {
