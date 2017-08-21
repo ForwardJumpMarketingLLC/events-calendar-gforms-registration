@@ -178,6 +178,10 @@ class Extend_Gravity_Form {
 			'field_id'
 		);
 
+		if ( empty( $field_ids ) ) {
+			return [];
+		}
+
 		$field_placeholders = implode( ', ', array_fill( 0, count( $field_ids ), '%s' ) );
 		$sql_variables      = array_merge( (array) $meta_key, (array) $this->get_post_id(), (array) $field_ids );
 
@@ -248,56 +252,17 @@ class Extend_Gravity_Form {
 			return;
 		}
 
-		add_filter( "gform_pre_submission_filter_{$form_id}", [ $this, 'modify_form' ]  );
-
-		add_filter( 'gform_entry_meta', function ($entry_meta, $form_id){
-			if ( $form_id !== $this->get_event_form_id() ) {
-				return $entry_meta;
-			}
-
-			$entry_meta['event_id'] = array(
-				'label' => 'Event ID',
-				'is_numeric' => true,
-				'update_entry_meta_callback' => [ $this, 'update_entry_meta' ],
-				'is_default_column' => true
-			);
-
-			return $entry_meta;
-		}, 10, 2);
-
 		add_filter( "gform_pre_render_{$form_id}", [ $this, 'insert_registration_notice' ] );
 
-		$form_settings = $this->get_event_form_settings();
-		foreach ( (array) $form_settings as $field ) {
-			$field_id = floor( $field['field_id'] );
+		$field_ids = array_column( $this->get_event_form_settings(), 'field_id' );
+		foreach ( (array) $field_ids as $field ) {
+			$field_id = floor( $field );
 			add_filter( "gform_field_validation_{$form_id}_{$field_id}", [ $this, 'validate_reservation_request' ], 10, 4 );
 		}
-	}
 
-	public function update_entry_meta() {
-		return $this->get_post_id();
-	}
+		add_filter( 'gform_entry_meta', [ $this, 'add_entry_meta' ], 10, 2);
 
-	function modify_form( $form ) {
-
-		if ( (int) $this->get_event_form_id() !== (int) $form['id'] ) {
-			return $form;
-		}
-
-		if ( empty( $_POST['input_888'] ) ) {
-			$_POST['input_888'] = get_the_title( $this->get_post_id() );
-		}
-
-		$new_field = \GF_Fields::create(
-			[
-				'id'                   => 888,
-				'type'                 => 'text',
-				'label'                => 'Event',
-			]
-		);
-
-		array_push( $form['fields'], $new_field );
-		return $form;
+		add_filter( 'gform_replace_merge_tags', [ $this, 'replace_event_info_merge_tag' ], 10, 3 );
 	}
 
 	/**
@@ -339,8 +304,6 @@ class Extend_Gravity_Form {
 	 * Validate the reservation request to make sure the max number is not
 	 * exceeded.
 	 *
-	 * @TODO refactor logic for determining available reservations for complex fields.
-	 *
 	 * @param array  $result Validation result.
 	 * @param string $value  Form field value.
 	 * @param array  $form   Form The current form to be filtered.
@@ -355,6 +318,7 @@ class Extend_Gravity_Form {
 		}
 
 		$available_reservations = null;
+
 		if ( is_array( $value ) ) {
 			$value = array_filter( $value );
 
@@ -383,6 +347,67 @@ class Extend_Gravity_Form {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Adds event_id meta to the entry.
+	 *
+	 * @param array $entry_meta Entry meta.
+	 * @param int   $form_id    Form ID.
+	 *
+	 * @return array
+	 */
+	public function add_entry_meta( $entry_meta, $form_id ) {
+		if ( (int) $form_id !== (int) $this->get_event_form_id() ) {
+			return $entry_meta;
+		}
+
+		$entry_meta['event_id'] = array(
+			'label'                      => 'Event Info',
+			'is_numeric'                 => true,
+			'update_entry_meta_callback' => function () {
+				return $this->get_post_id();
+			},
+			'is_default_column'          => true
+		);
+
+		return $entry_meta;
+	}
+
+	/**
+	 * Replaces the merge tag {event_info}.
+	 *
+	 * @param string $text The current text in which merge tags are being replaced.
+	 * @param array $form The current form.
+	 * @param array $entry The current entry.
+	 *
+	 * @return string
+	 */
+	function replace_event_info_merge_tag( $text, $form, $entry ) {
+
+		if ( empty( $entry ) || (int) $form['id'] !== (int) $this->get_event_form_id() ) {
+			return $text;
+		}
+
+		$custom_merge_tag = '{event_info}';
+
+		if ( false === strpos( $text, $custom_merge_tag ) ) {
+			return $text;
+		}
+
+		$event_id = gform_get_meta( $entry['id'], 'event_id' );
+
+		if ( ! $event_id ) {
+			return $text;
+		}
+
+		$event_info = sprintf( '<a href="%s">%s</a>', get_the_permalink( $event_id ),
+			$event_id . ' - ' .  get_the_title( $event_id )
+		);
+
+		$text = str_replace( $custom_merge_tag, $event_info, $text );
+
+		return $text;
 	}
 
 	/**
