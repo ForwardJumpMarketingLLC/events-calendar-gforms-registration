@@ -17,9 +17,12 @@ class ECGF_Admin extends \WP_UnitTestCase {
 
 		set_current_screen( 'edit-post' );
 
-		load_admin_files();
+		require_once dirname( dirname( __DIR__ ) ) . '/the-events-calendar/the-events-calendar.php';
+		require_once dirname( dirname( __DIR__ ) ) . '/gravityforms/gravityforms.php';
 
-		$cmb_init = \CMB2_Bootstrap_2252::initiate();
+		\ForwardJump\ECGF_Registration\init();
+
+		$cmb_init = \CMB2_Bootstrap_226_Trunk::initiate();
 		$cmb_init->include_cmb();
 	}
 

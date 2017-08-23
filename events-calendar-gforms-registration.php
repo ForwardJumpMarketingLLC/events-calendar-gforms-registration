@@ -35,7 +35,7 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\\init', 5 );
  */
 function init() {
 
-	if ( ! class_exists( 'Tribe__Events__API' ) || ! class_exists( 'GFForms' ) ) {
+	if ( ! class_exists( 'Tribe__Events__Main' ) || ! class_exists( 'GFForms' ) ) {
 
 		add_action( 'admin_notices', __NAMESPACE__ . '\\activation_error_notice' );
 		add_action( 'admin_init', __NAMESPACE__ . '\\deactivate_plugin' );
