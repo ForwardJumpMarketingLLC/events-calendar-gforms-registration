@@ -21,6 +21,7 @@ return [
 	[
 		'metabox' => [
 			'object_types' => [ 'tribe_events' ],
+			'classes'      => 'ecgf-registration',
 			'title'        => 'Event Registration Information',
 			'show_on_cb'   => 'ForwardJump\ECGF_Registration\is_gf_active',
 		],
@@ -33,7 +34,7 @@ return [
 			],
 			[
 				'name'        => 'Notice',
-				'description' => 'Optionally display a message above the first form field selected below.',
+				'description' => 'Display a message above the first form field that is selected below. (Optional)<br><strong>Example:</strong> "There are only {field_1} seats left."',
 				'id'          => 'ecgf_registration_notice',
 				'type'        => 'textarea_small',
 			],
@@ -46,17 +47,21 @@ return [
 				),
 				'fields'  => [
 					[
-						'name' => 'Maximum Reservations',
-						'id'   => 'max_reservations',
-						'type' => 'text_small',
+						'name'       => 'Maximum Reservations',
+						'id'         => 'max_reservations',
+						'type'       => 'text_small',
+						'attributes' => [
+							'type' => 'number',
+							'min'  => '0',
+						],
 					],
 					[
-						'name'        => 'Select Field',
-						'description' => 'Choose the form field that should be used to update the number of registrants.',
-						'id'          => 'field_id',
-						'type'        => 'select',
+						'name'             => 'Select Field',
+						'description'      => 'This field will be used to keep track of the number of registrants.',
+						'id'               => 'field_id',
+						'type'             => 'select',
 						'show_option_none' => 'None selected',
-						'options_cb'  => 'ForwardJump\ECGF_Registration\get_form_fields',
+						'options_cb'       => 'ForwardJump\ECGF_Registration\get_form_fields',
 					],
 				],
 			],
