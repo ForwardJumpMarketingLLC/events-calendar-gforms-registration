@@ -6,6 +6,4 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'ForwardJump\\ECGF_Registration\\Extend_Gravity_Form' => $baseDir . '/src/class-extend-gravity-form.php',
-    'ForwardJump\\ECGF_Registration\\Post_Metabox' => $baseDir . '/src/class-post-metabox.php',
 );

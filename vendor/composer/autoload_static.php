@@ -11,6 +11,10 @@ class ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b
         array (
             'ForwardJump\\ECGF_Registration\\' => 30,
         ),
+        'C' => 
+        array (
+            'Composer\\Installers\\' => 20,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -18,11 +22,10 @@ class ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
-    );
-
-    public static $classMap = array (
-        'ForwardJump\\ECGF_Registration\\Extend_Gravity_Form' => __DIR__ . '/../..' . '/src/class-extend-gravity-form.php',
-        'ForwardJump\\ECGF_Registration\\Post_Metabox' => __DIR__ . '/../..' . '/src/class-post-metabox.php',
+        'Composer\\Installers\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
+        ),
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -30,7 +33,6 @@ class ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit776ffd7bd52b3e9afa3c292e4141f92b::$classMap;
 
         }, null, ClassLoader::class);
     }
