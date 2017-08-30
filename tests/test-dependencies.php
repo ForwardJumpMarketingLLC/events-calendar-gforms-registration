@@ -19,7 +19,7 @@ class ECGF_Dependencies extends \WP_UnitTestCase {
 
 		load_admin_files();
 
-		$cmb_init = \CMB2_Bootstrap_226_Trunk::initiate();
+		$cmb_init = \CMB2_Bootstrap_2253::initiate();
 		$cmb_init->include_cmb();
 	}
 

@@ -22,7 +22,7 @@ class ECGF_Admin extends \WP_UnitTestCase {
 
 		\ForwardJump\ECGF_Registration\init();
 
-		$cmb_init = \CMB2_Bootstrap_226_Trunk::initiate();
+		$cmb_init = \CMB2_Bootstrap_2253::initiate();
 		$cmb_init->include_cmb();
 	}
 
