@@ -28,16 +28,16 @@ class Extend_Gravity_Form {
 	/**
 	 * Post ID.
 	 *
-	 * @var null
+	 * @var int|bool
 	 */
-	protected $post_id = null;
+	protected $post_id = false;
 
 	/**
 	 * Event form id.
 	 *
-	 * @var null
+	 * @var string|bool
 	 */
-	protected $event_form_id = null;
+	protected $event_form_id = false;
 
 	/**
 	 * Event form settings.
@@ -127,8 +127,21 @@ class Extend_Gravity_Form {
 	 */
 	protected function get_event_form_id() {
 		if ( ! $this->event_form_id ) {
-			$this->event_form_id = get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
+			$this->set_event_form_id();
 		}
+
+		return $this->event_form_id;
+	}
+
+	/**
+	 * Set the $event_form_id property.
+	 *
+	 * @return string|bool
+	 */
+	protected function set_event_form_id() {
+		$event_form_id = get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
+
+		$this->event_form_id = ( 'null' === $event_form_id ) ? false : $event_form_id;
 
 		return $this->event_form_id;
 	}
