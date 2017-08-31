@@ -125,7 +125,7 @@ function get_form_field_options( $form_id ) {
 	$form = \GFFormsModel::get_form_meta( $form_id );
 
 	$options = [];
-	foreach ( $form['fields'] as $field ) {
+	foreach ( (array) $form['fields'] as $field ) {
 		if ( empty( $field['inputs'] ) ) {
 			$options[ $field['id'] ] = $field['label'];
 		} else {

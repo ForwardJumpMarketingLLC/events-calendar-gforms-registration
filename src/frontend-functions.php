@@ -39,7 +39,7 @@ function render_gravity_form() {
 
 	$gform_id = get_post_meta( get_the_ID(), 'ecgf_form_id', true );
 
-	if ( ! $gform_id ) {
+	if ( false === filter_var( $gform_id, FILTER_VALIDATE_BOOLEAN ) ) {
 		return;
 	}
 
