@@ -141,7 +141,7 @@ class Extend_Gravity_Form {
 	protected function set_event_form_id() {
 		$event_form_id = get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
 
-		$this->event_form_id = ( 'null' === $event_form_id ) ? false : $event_form_id;
+		$this->event_form_id = filter_var( $event_form_id, FILTER_VALIDATE_BOOLEAN ) ? $event_form_id : false;
 
 		return $this->event_form_id;
 	}
