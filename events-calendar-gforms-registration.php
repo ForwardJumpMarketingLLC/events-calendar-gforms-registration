@@ -7,7 +7,7 @@
  * Author URI:      https://forwardjump.com
  * Text Domain:     events-calendar-gforms-registration
  * Domain Path:     /languages
- * Version:         0.1.2
+ * Version:         0.1.3
  *
  * BitBucket Plugin URI: https://bitbucket.org/forwardjump/events-calendar-gravity-forms-registration
  *
