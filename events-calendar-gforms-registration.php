@@ -28,9 +28,9 @@ define( 'ECGF_DIR_TEXT_DOMAIN', 'events-calendar-gforms-registration' );
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\init', 5 );
 /**
- * Checks for dependecies before loading plugin files.
+ * Checks for dependencies before loading plugin files.
  *
- * @since 0.1.1
+ * @since 0.1.2
  * @return void
  */
 function init() {

@@ -39,9 +39,15 @@ function render_gravity_form() {
 
 	$gform_id = get_post_meta( get_the_ID(), 'ecgf_form_id', true );
 
-	if ( false === filter_var( $gform_id, FILTER_VALIDATE_BOOLEAN ) ) {
+	if ( 0 === (int) $gform_id ) {
 		return;
 	}
 
-	echo do_shortcode("[gravityform id={$gform_id}]");
+	$shortcode_options = get_post_meta( get_the_ID(), 'ecgf_form_meta', true );
+
+	$show_title = empty( $shortcode_options[0]['show_form_title'] ) ? 'false' : 'true';
+	$show_description = empty( $shortcode_options[0]['show_form_description'] ) ? 'false' : 'true';
+	$enable_ajax = empty( $shortcode_options[0]['enable_ajax'] ) ? 'false' : 'true';
+
+	echo do_shortcode("[gravityform id={$gform_id} title={$show_title} description={$show_description} ajax={$enable_ajax}]");
 }

@@ -141,7 +141,7 @@ class Extend_Gravity_Form {
 	protected function set_event_form_id() {
 		$event_form_id = get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
 
-		$this->event_form_id = filter_var( $event_form_id, FILTER_VALIDATE_BOOLEAN ) ? $event_form_id : false;
+		$this->event_form_id = ( 0 === (int) $event_form_id ) ? false: $event_form_id;
 
 		return $this->event_form_id;
 	}
@@ -286,7 +286,9 @@ class Extend_Gravity_Form {
 	 * @return array
 	 */
 	public function insert_registration_notice( $form ) {
-		$notice             = get_post_meta( $this->get_post_id(), 'ecgf_registration_notice', true );
+		$form_meta = get_post_meta( $this->get_post_id(), 'ecgf_form_meta', true );
+		$notice = empty( $form_meta[0]['notice'] ) ? '' : $form_meta[0]['notice'];
+
 		$insert_above_field = isset( $this->get_event_form_settings()[0]['field_id'] ) ? $this->get_event_form_settings()[0]['field_id'] : null;
 
 		if ( ! $insert_above_field || ! $notice ) {

@@ -33,12 +33,6 @@ return [
 				'options_cb' => 'ForwardJump\ECGF_Registration\get_forms',
 			],
 			[
-				'name'        => 'Notice',
-				'description' => 'Display a message above the first form field that is selected below. (Optional)<br><strong>Example:</strong> "There are only {field_1} seats left."',
-				'id'          => 'ecgf_registration_notice',
-				'type'        => 'textarea_small',
-			],
-			[
 				'type'    => 'group',
 				'id'      => 'ecgf_form_settings',
 				'options' => array(
@@ -65,6 +59,37 @@ return [
 					],
 				],
 			],
+			[
+				'type'    => 'group',
+				'id'      => 'ecgf_form_meta',
+				'repeatable' => false,
+				'options' => array(
+					'group_title' => __( 'Form Options', ECGF_DIR_TEXT_DOMAIN ),
+				),
+				'fields'  => [
+					[
+						'name'        => 'Display form title?',
+						'id'          => 'show_form_title',
+						'type'        => 'checkbox',
+					],
+					[
+						'name'        => 'Display form description?',
+						'id'          => 'show_form_description',
+						'type'        => 'checkbox',
+					],
+					[
+						'name'        => 'Enable Ajax?',
+						'id'          => 'enable_ajax',
+						'type'        => 'checkbox',
+					],
+					[
+						'name'        => 'Notice',
+						'description' => 'Display a message above the first form field that is selected above. (Optional)<br><strong>Example:</strong> "There are only {field_1} seats left."',
+						'id'          => 'notice',
+						'type'        => 'textarea_small',
+					],
+				]
+			]
 		],
 	],
 ];
