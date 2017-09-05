@@ -78,8 +78,8 @@ class Extend_Gravity_Form {
 	 * @return bool|void
 	 */
 	public function init() {
-		add_action( 'wp', [ $this, 'set_properties' ] );
-		add_action( 'wp', [ $this, 'gform_hooks' ], 5 );
+		add_action( 'wp', [ $this, 'set_properties' ], 5 );
+		add_action( 'wp', [ $this, 'gform_hooks' ], 7 );
 	}
 
 	/**
@@ -291,6 +291,16 @@ class Extend_Gravity_Form {
 
 		$insert_above_field = isset( $this->get_event_form_settings()[0]['field_id'] ) ? $this->get_event_form_settings()[0]['field_id'] : null;
 
+		/**
+		 * Filter the position of the form notice.
+		 *
+		 * @param string $insert_above_field The ID of the field where the notice will be displayed.
+		 * @param array  $form               Gravity Form object.
+		 * @param string $notice             The notice that will be displayed.
+		 * @return string
+		 */
+		$insert_above_field = apply_filters( 'ecgf_form_notice_position', $insert_above_field, $form, $notice );
+
 		if ( ! $insert_above_field || ! $notice ) {
 			return $form;
 		}
@@ -334,6 +344,7 @@ class Extend_Gravity_Form {
 
 		$available_reservations = null;
 
+		// Handle complex GF fields.
 		if ( is_array( $value ) ) {
 			$value = array_filter( $value );
 
@@ -360,6 +371,18 @@ class Extend_Gravity_Form {
 				$result['message'] = "Please enter a value up to {$available_reservations}";
 			}
 		}
+
+		/**
+		 * Filter the validation result.
+		 *
+		 * @param array  $result Validation result.
+		 * @param int $available_reservations Number of available reservations.
+		 * @param string $value  Form field value.
+		 * @param array  $form   Form The current form to be filtered.
+		 * @param object $field  Form field data.
+		 * @return array
+		 */
+		$result = apply_filters( 'ecgf_field_validation_result', $result, $available_reservations, $value, $form, $field );
 
 		return $result;
 	}
@@ -438,6 +461,11 @@ class Extend_Gravity_Form {
 		$keys   = array_column( (array) $array, $key );
 		$values = array_column( (array) $array, $value );
 
+		// Array combine requires arrays of equal size.
+		if ( count( (array) $keys) !== count( (array) $values ) ) {
+			return null;
+		}
+
 		$transformed_array = array_combine( $keys, $values );
 
 		return $transformed_array;
@@ -452,16 +480,46 @@ class Extend_Gravity_Form {
 	 * @return string
 	 */
 	protected function update_registration_notice( $message, $fields ) {
-		$remaining_slots  = (array) $this->get_available_reservations();
+		$remaining_slots  = array_values( (array) $this->get_available_reservations() );
 		$number_of_fields = count( $remaining_slots );
 
-		$search_strings = [];
-		for ( $i = 1; $i <= $number_of_fields; $i ++ ) {
-			$search_strings[] = "{field_{$i}}";
+		$search_replace = [];
+		for ( $i = 0; $i < $number_of_fields; $i ++ ) {
+			$search = '{field_' . ( $i + 1 ). '}';
+			$replace = $remaining_slots[$i];
+			$search_replace[$search] = $replace;
 		}
 
-		$updated_message = str_replace( (array) $search_strings, (array) $remaining_slots, $message );
+		$updated_message = str_replace(
+			array_keys( (array) $search_replace ),
+			array_values( (array) $search_replace ),
+			$message
+		);
 
-		return '<span>' . $updated_message . '</span>';
+		/**
+		 * Change the form notice text.
+		 *
+		 * @param string $updated_message Form notice that will be displayed to the user.
+		 * @param string $message         Original notice before it was updated.
+		 * @param array  $search_replace  Array of search replace pairs.
+		 * @return string
+		 */
+		$updated_message = apply_filters( 'ecgf_form_notice_text', $updated_message, $message, $search_replace );
+
+		/**
+		 * Filter the notice markup.
+		 *
+		 * @param array Opening and Closing markup for the form notice.
+		 * @return array
+		 */
+		$markup = apply_filters(
+			'ecgf_form_notice_markup',
+			[
+				'open'  => '<span>',
+				'close' => '</span>'
+			]
+		);
+
+		return $markup['open'] . $updated_message . $markup['close'];
 	}
 }
