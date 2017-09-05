@@ -41,15 +41,6 @@ return [
 				),
 				'fields'  => [
 					[
-						'name'       => 'Maximum Reservations',
-						'id'         => 'max_reservations',
-						'type'       => 'text_small',
-						'attributes' => [
-							'type' => 'number',
-							'min'  => '0',
-						],
-					],
-					[
 						'name'             => 'Select Field',
 						'description'      => 'This field will be used to keep track of the number of registrants.',
 						'id'               => 'field_id',
@@ -57,30 +48,40 @@ return [
 						'show_option_none' => 'None selected',
 						'options_cb'       => 'ForwardJump\ECGF_Registration\get_form_fields',
 					],
+					[
+						'name'        => 'Limit',
+						'description' => '<p class="cmb2-metabox-description">Enter a number to limit the number of registrants, or leave blank for unlimited.</p>',
+						'id'          => 'max_reservations',
+						'type'        => 'text_small',
+						'attributes'  => [
+							'type' => 'number',
+							'min'  => '0',
+						],
+					],
 				],
 			],
 			[
-				'type'    => 'group',
-				'id'      => 'ecgf_form_meta',
+				'type'       => 'group',
+				'id'         => 'ecgf_form_meta',
 				'repeatable' => false,
-				'options' => array(
+				'options'    => array(
 					'group_title' => __( 'Form Options', ECGF_DIR_TEXT_DOMAIN ),
 				),
-				'fields'  => [
+				'fields'     => [
 					[
-						'name'        => 'Display form title?',
-						'id'          => 'show_form_title',
-						'type'        => 'checkbox',
+						'name' => 'Display form title?',
+						'id'   => 'show_form_title',
+						'type' => 'checkbox',
 					],
 					[
-						'name'        => 'Display form description?',
-						'id'          => 'show_form_description',
-						'type'        => 'checkbox',
+						'name' => 'Display form description?',
+						'id'   => 'show_form_description',
+						'type' => 'checkbox',
 					],
 					[
-						'name'        => 'Enable Ajax?',
-						'id'          => 'enable_ajax',
-						'type'        => 'checkbox',
+						'name' => 'Enable Ajax?',
+						'id'   => 'enable_ajax',
+						'type' => 'checkbox',
 					],
 					[
 						'name'        => 'Notice',

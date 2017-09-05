@@ -7,6 +7,10 @@
     display: none;
 }
 
+.ecgf-registration .cmb-type-group .cmb-repeat-group-field {
+    padding-top: .5rem;
+}
+
 .cmb2-postbox .ecgf-registration .cmb-repeatable-group:not(:last-of-type),
 .cmb2-postbox .ecgf-registration .cmb-row:not(:last-of-type) {
     border-bottom: none !important;
