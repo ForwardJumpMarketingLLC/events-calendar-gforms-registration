@@ -31,14 +31,15 @@ return [
 				'id'         => 'ecgf_form_id',
 				'type'       => 'select',
 				'options_cb' => 'ForwardJump\ECGF_Registration\get_forms',
+				'after' => '<p><a id="gfom-entries-link" href="' . get_admin_url( null, '/admin.php?page=gf_entries&view=entries&id={form_id}&field_id=event_id&s={event_id}' ) . '">See form entries</a></p>'
 			],
 			[
 				'type'    => 'group',
 				'id'      => 'ecgf_form_settings',
-				'options' => array(
+				'options' => [
 					'group_title' => __( 'Form Field - reference as {field_{#}}', ECGF_DIR_TEXT_DOMAIN ),
 					'add_button'  => __( 'Add Another Field', ECGF_DIR_TEXT_DOMAIN ),
-				),
+				],
 				'fields'  => [
 					[
 						'name'             => 'Select Field',
@@ -64,9 +65,9 @@ return [
 				'type'       => 'group',
 				'id'         => 'ecgf_form_meta',
 				'repeatable' => false,
-				'options'    => array(
+				'options'    => [
 					'group_title' => __( 'Form Options', ECGF_DIR_TEXT_DOMAIN ),
-				),
+				],
 				'fields'     => [
 					[
 						'name' => 'Display form title?',
