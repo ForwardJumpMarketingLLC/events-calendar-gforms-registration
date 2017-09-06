@@ -31,7 +31,7 @@ return [
 				'id'         => 'ecgf_form_id',
 				'type'       => 'select',
 				'options_cb' => 'ForwardJump\ECGF_Registration\get_forms',
-				'after' => '<p><a id="gfom-entries-link" href="' . get_admin_url( null, '/admin.php?page=gf_entries&view=entries&id={form_id}&field_id=event_id&s={event_id}' ) . '">See form entries</a></p>'
+				'after' => '<p><a id="gfom-entries-link" href="' . get_admin_url( null, '/admin.php?page=gf_entries&view=entries&id={form_id}&field_id=event_id&s=' . ( isset( $_GET['post'] ) ? absint( $_GET['post'] ) : '' ) ) . '">View registration entries</a></p>'
 			],
 			[
 				'type'    => 'group',

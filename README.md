@@ -24,11 +24,14 @@ Download the latest tagged release and install it using the WordPress plugin ins
 
 ## Usage
 
-Once configured, the registration form will appear below the event meta information on the front end. The form can be repositioned 
+Once configured, the registration form will appear below the event meta information on the front end. The form can be repositioned with a couple of lines of code (see below).
+
+Registration form entries can be viewed by clicking the `View registration entries` link found in the Event Registration Information meta box on the event edit screen.
 
 ## Customization
 - Reposition the form:
 ```php
+// Unhook the form and reposition it immediately after the event content area.
 remove_action( 'tribe_events_single_event_after_the_meta', 'ForwardJump\ECGF_Registration\render_gravity_form' );
 add_action( 'tribe_events_single_event_after_the_content', 'ForwardJump\ECGF_Registration\render_gravity_form', 5 );
 ```
@@ -76,11 +79,11 @@ add_filter( 'ecgf_field_validation_result', 'change_field_validation_result', 10
 /**
  * Filter the validation result.
  *
- * @param array  $result Validation result.
- * @param int $available_reservations Number of available reservations.
- * @param string $value  Form field value.
- * @param array  $form   Form The current form to be filtered.
- * @param object $field  Form field data.
+ * @param array  $result                 Validation result.
+ * @param int    $available_reservations Number of available reservations.
+ * @param string $value                  Form field value.
+ * @param array  $form                   Form The current form to be filtered.
+ * @param object $field                  Form field data.
  * @return array
  */
 function change_field_validation_result( $result, $available_reservations, $value, $form, $field ) {
