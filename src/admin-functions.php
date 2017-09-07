@@ -66,7 +66,7 @@ function get_forms() {
 
 	$forms_list = [ 'null' => 'None selected' ];
 	foreach ( $forms_array as $forms ) {
-		$forms_list[ $forms->id ] = $forms->title;
+		$forms_list[$forms->id] = $forms->title;
 	}
 
 	return $forms_list;
@@ -127,11 +127,11 @@ function get_form_field_options( $form_id ) {
 	$options = [];
 	foreach ( (array) $form['fields'] as $field ) {
 		if ( empty( $field['inputs'] ) ) {
-			$options[ $field['id'] ] = $field['label'];
+			$options[$field['id']] = $field['label'];
 		} else {
 			foreach ( $field['inputs'] as $input ) {
 				if ( empty( $input['isHidden'] ) ) {
-					$options[ $input['id'] ] = $input['label'];
+					$options[$input['id']] = $input['label'];
 				}
 			}
 		}
@@ -140,28 +140,38 @@ function get_form_field_options( $form_id ) {
 	return $options;
 }
 
-add_filter( 'gform_entry_meta', __NAMESPACE__ . '\\modify_entry_meta', 10, 2);
+add_filter( 'gform_form_post_get_meta', __NAMESPACE__ . '\\add_event_id_field_to_form_meta' );
 /**
  * Modifies the entry meta if the form has been designated as a registration form.
  *
- * @param array $entry_meta Entry meta array.
- * @param int $form_id The ID of the form from which the entry value was submitted.
- *
+ * @param array $form The form object.
  * @return array
  */
-function modify_entry_meta( $entry_meta, $form_id ){
-	if ( ! is_event_registration_form( $form_id ) ) {
-		return $entry_meta;
+function add_event_id_field_to_form_meta( $form ) {
+	if ( 'gf_edit_forms' === rgget( 'page' ) || ! is_event_registration_form( $form['id'] ) ) {
+		return $form;
 	}
 
-	$entry_meta['event_id'] = array(
-		'label' => 'Event Info',
-		'is_numeric' => true,
-		'is_default_column' => true,
+	$new_field = \GF_Fields::create(
+		[
+			'id'    => 'event_id',
+			'label' => 'Event ID',
+			'type'  => 'text',
+		]
 	);
 
-	return $entry_meta;
+	$form['fields'][] = $new_field;
+
+	return $form;
 }
+
+add_filter( 'gform_get_input_value', function( $value, $lead, $field ) {
+	if ( 'event_id' !== $field->id ) {
+		return $value;
+	}
+
+	return $value;
+}, 10, 3);
 
 add_filter( 'gform_entries_column_filter', __NAMESPACE__ . '\\change_column_data', 10, 5 );
 /**
@@ -190,7 +200,7 @@ function change_column_data( $value, $form_id, $field_id, $entry, $query_string 
  * Renders basic information about the event.
  *
  * @param string|int $event_id The post ID of the event.
- * @param bool $link Whether the value should be rendered as a link.
+ * @param bool       $link     Whether the value should be rendered as a link.
  *
  * @return string
  */
@@ -199,7 +209,7 @@ function event_info_output( $event_id, $link = true ) {
 		return '';
 	}
 
-	$info = $event_id . ' - ' .  get_the_title( $event_id );
+	$info = $event_id . ' - ' . get_the_title( $event_id );
 
 	if ( ! $link ) {
 		return $info;
@@ -212,10 +222,10 @@ add_filter( 'gform_export_field_value', __NAMESPACE__ . '\\modify_exported_event
 /**
  * Modify the Event field value when entries are exported.
  *
- * @param string $value Value of the field being exported.
- * @param int $form_id ID of the current form.
- * @param int $field_id ID of the current field.
- * @param object $entry The current entry.
+ * @param string $value    Value of the field being exported.
+ * @param int    $form_id  ID of the current form.
+ * @param int    $field_id ID of the current field.
+ * @param object $entry    The current entry.
  *
  * @return string
  */
@@ -272,8 +282,8 @@ add_filter( 'gform_entry_detail_meta_boxes', __NAMESPACE__ . '\\add_event_info_m
  * Adds an event info meta box to the appropriate entries.
  *
  * @param array $meta_boxes Meta box properties.
- * @param array $entry The entry currently being viewed/edited.
- * @param array $form The form object used to process the current entry.
+ * @param array $entry      The entry currently being viewed/edited.
+ * @param array $form       The form object used to process the current entry.
  *
  * @return array
  */
@@ -296,6 +306,7 @@ function add_event_info_meta_box( $meta_boxes, $entry, $form ) {
  *
  * @param array $entry Current entry.
  * @param array $form  Current form.
+ *
  * @return void
  */
 function entry_meta_meta_box_callback( $entry, $form ) {
@@ -319,12 +330,13 @@ function add_event_info_merge_tag( $form ) {
 
 	?>
 	<script type="text/javascript">
-        gform.addFilter('gform_merge_tags', 'add_merge_tags');
-        function add_merge_tags(mergeTags, elementId, hideAllFields, excludeFieldTypes, isPrepop, option){
-            mergeTags["other"].tags.push({ tag: '{event_info}', label: 'Event Registration Info' });
+		gform.addFilter('gform_merge_tags', 'add_merge_tags');
 
-            return mergeTags;
-        }
+		function add_merge_tags(mergeTags, elementId, hideAllFields, excludeFieldTypes, isPrepop, option) {
+			mergeTags["other"].tags.push({tag: '{event_info}', label: 'Event Registration Info'});
+
+			return mergeTags;
+		}
 	</script>
 	<?php
 
