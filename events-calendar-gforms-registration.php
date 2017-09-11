@@ -1,15 +1,16 @@
 <?php
 /**
- * Plugin Name:     Events Calendar GForms Registration
- * Plugin URI:      https://bitbucket.org/forwardjump/events-calendar-gravity-forms-registration
- * Description:     Use Gravity Forms to handle registration for The Events Calendar events.
- * Author:          Tim Jensen
- * Author URI:      https://forwardjump.com
- * Text Domain:     events-calendar-gforms-registration
- * Domain Path:     /languages
- * Version:         0.1.4
+ * Plugin Name: Events Calendar GForms Registration
+ * Plugin URI:  https://github.com/ForwardJumpMarketingLLC/events-calendar-gforms-registration
+ * Description: Use Gravity Forms to handle registration for The Events Calendar events.
+ * Author:      Tim Jensen
+ * Author URI:  https://forwardjump.com
+ * Text Domain: events-calendar-gforms-registration
+ * Domain Path: /languages
+ * License:     GPLv2 or later
+ * Version:     0.1.5
  *
- * BitBucket Plugin URI: https://bitbucket.org/forwardjump/events-calendar-gravity-forms-registration
+ * GitHub Plugin URI: https://github.com/ForwardJumpMarketingLLC/events-calendar-gforms-registration
  *
  * @package         ForwardJump\ECGF_Registration
  */

@@ -99,6 +99,22 @@ function change_field_validation_result( $result, $available_reservations, $valu
 }
 ```
 
+- Change the meta box configuration:
+```php
+add_filter( 'ecgf_post_metabox_config', 'modify_event_metabox_config' );
+/**
+ * Modifies the event registration meta box.
+ *
+ * @param array $config Configuration for building the post meta box.
+ * @return array
+ */
+function modify_event_metabox_config( $config ) {
+	$config[0]['metabox']['title'] = 'Registration Form';
+
+	return $config;
+}
+```
+
 ### Credits
 Built by [Tim Jensen](https://github.com/timothyjensen).
 

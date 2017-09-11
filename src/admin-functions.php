@@ -23,6 +23,8 @@ function event_metabox_init() {
 
 	$config = include_once ECGF_CONFIG_DIR . '/post-metabox-config.php';
 
+	$config = apply_filters( 'ecgf_post_metabox_config', $config );
+
 	foreach ( (array) $config as $metabox ) {
 		( new Post_Metabox( $metabox ) )->init();
 	}
@@ -140,6 +142,29 @@ function get_form_field_options( $form_id ) {
 	return $options;
 }
 
+add_filter( 'gform_entry_meta', __NAMESPACE__ . '\\modify_entry_meta', 10, 2);
+/**
+ * Modifies the entry meta if the form has been designated as a registration form.
+ *
+ * @param array $entry_meta Entry meta array.
+ * @param int $form_id The ID of the form from which the entry value was submitted.
+ *
+ * @return array
+ */
+function modify_entry_meta( $entry_meta, $form_id ){
+	if ( ! is_event_registration_form( $form_id ) ) {
+		return $entry_meta;
+	}
+
+	$entry_meta['event_id'] = array(
+		'label' => 'Event Info',
+		'is_numeric' => false,
+		'is_default_column' => false,
+	);
+
+	return $entry_meta;
+}
+
 add_filter( 'gform_form_post_get_meta', __NAMESPACE__ . '\\add_event_id_field_to_form_meta' );
 /**
  * Modifies the entry meta if the form has been designated as a registration form.
@@ -170,7 +195,7 @@ add_filter( 'gform_get_input_value', function( $value, $lead, $field ) {
 		return $value;
 	}
 
-	return $value;
+	return event_info_output( $value );
 }, 10, 3);
 
 add_filter( 'gform_entries_column_filter', __NAMESPACE__ . '\\change_column_data', 10, 5 );
