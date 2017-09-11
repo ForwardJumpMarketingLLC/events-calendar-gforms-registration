@@ -9,6 +9,7 @@ notifications:
 
 branches:
   only:
+    - develop
     - master
 
 php:
@@ -19,12 +20,12 @@ php:
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
-  - WP_VERSION=3.7 WP_MULTISITE=0
+  - WP_VERSION=4.7 WP_MULTISITE=0
   - WP_VERSION=4.8 WP_MULTISITE=0
 
 matrix:
   include:
-    - php: 5.3
+    - php: 7.0
       env: WP_VERSION=latest WP_MULTISITE=1
 
 before_script:
@@ -41,5 +42,5 @@ before_script:
     phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs
 
 script:
-  - phpcs --standard=phpcs.ruleset.xml $(find . -name '*.php')
+#  - phpcs --standard=phpcs.ruleset.xml $(find . -name '*.php')
   - phpunit
