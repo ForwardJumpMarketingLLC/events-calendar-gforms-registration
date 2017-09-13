@@ -444,6 +444,16 @@ class Extend_Gravity_Form {
 			$event_id . ' - ' . get_the_title( $event_id )
 		);
 
+		/**
+		 * Change the default text that replaces the {event_info} merge tag.
+		 *
+		 * @param string $event_info Text that will replace the {event_info} merge tag.
+		 * @param string $event_id   Event ID.
+		 *
+		 * @return string
+		 */
+		$event_info = apply_filters( 'ecgf_event_info_merge_tag', $event_info, $event_id );
+
 		$text = str_replace( $custom_merge_tag, $event_info, $text );
 
 		return $text;
