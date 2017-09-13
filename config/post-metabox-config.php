@@ -23,7 +23,6 @@ return [
 			'object_types' => [ 'tribe_events' ],
 			'classes'      => 'ecgf-registration',
 			'title'        => 'Event Registration Information',
-			'show_on_cb'   => 'ForwardJump\ECGF_Registration\is_gf_active',
 		],
 		'fields'  => [
 			[
