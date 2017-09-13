@@ -15,14 +15,13 @@ Download the latest tagged release and install it using the WordPress plugin ins
 
 1. First create a new Gravity Form. Make sure your form has one field that you can use to track the number of registrants. For example, this could be a "name" field if you only need to register one person per form submission.
 
-
 2. Next, create a new event. You will see a new meta box on the event edit screen that allows you to select an event registration form. Select the form and the form field that will be used to track the number of people who have registered. For complex registration requirements, you may need to add additional form fields. For example, if your event can accommodate 20 adults and 10 children, then you should select a form field to track each of those registrant types. Enter a number to limit the number of registrations that the form can accept. 
 ![Event edit screen screenshot](assets/images/form-setup.png "Event edit screen screenshot")
-
 
 3. Lastly, configure the Form Options. You can enter a notice that will be displayed within the form. This can be helpful if you want to notify users about how many reservations remain. Form notices will look like this: 
 ![Event form notice screenshot](assets/images/front-end-form-notice.png "Event form notice screenshot")
 
+_Optional_: You can include basic event information in notification emails by adding the merge tag `{event_info}` to the Gravity Forms notification template.
 
 ## Usage
 
