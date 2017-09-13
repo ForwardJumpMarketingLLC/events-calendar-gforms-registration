@@ -215,10 +215,38 @@ function event_info_output( $event_id, $link = true ) {
 	$info = $event_id . ' - ' . get_the_title( $event_id );
 
 	if ( ! $link ) {
-		return $info;
+		/**
+		 * Change the event information that will be rendered.
+		 *
+		 * @param string $info Event information to output.
+		 * @param string $event_id The post ID of the event.
+		 * @param bool $link Whether the value should be rendered as a link.
+		 *
+		 * @return string
+		 */
+		$event_info_without_link = apply_filters( 'ecgf_event_info_output', $info, $event_id, $link );
+
+		return $event_info_without_link;
 	}
 
-	return sprintf( '<a href="%s">%s</a>', get_edit_post_link( $event_id ), $info );
+	/**
+	 * Change the event information that will be rendered.
+	 *
+	 * @param string $info Event information to output.
+	 * @param string $event_id The post ID of the event.
+	 * @param bool $link Whether the value should be rendered as a link.
+	 *
+	 * @return string
+	 */
+	$event_info_with_link = apply_filters(
+		'ecgf_event_info_output',
+		sprintf( '<a href="%s">%s</a>', get_edit_post_link( $event_id ), $info ),
+		$info,
+		$event_id,
+		$link
+	);
+
+	return $event_info_with_link;
 }
 
 add_filter( 'gform_entry_field_value', __NAMESPACE__ . '\\modify_entry_event_id_field_value', 10, 4 );
