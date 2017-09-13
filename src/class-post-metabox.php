@@ -69,7 +69,7 @@ class Post_Metabox {
 	 *
 	 * @since  0.1.0
 	 *
-	 * @return void.
+	 * @return \CMB2 instance.
 	 */
 	public function init_metabox() {
 		$cmb = new_cmb2_box( (array) $this->metabox_config );

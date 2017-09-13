@@ -70,7 +70,8 @@ class Extend_Gravity_Form {
 	/**
 	 * Extend_Gravity_Form constructor.
 	 */
-	public function __construct() {}
+	public function __construct() {
+	}
 
 	/**
 	 * Hooks into Gravity Forms to modify the form.
@@ -141,7 +142,7 @@ class Extend_Gravity_Form {
 	protected function set_event_form_id() {
 		$event_form_id = get_post_meta( $this->get_post_id(), 'ecgf_form_id', true );
 
-		$this->event_form_id = ( 0 === (int) $event_form_id ) ? false: $event_form_id;
+		$this->event_form_id = ( 0 === (int) $event_form_id ) ? false : $event_form_id;
 
 		return $this->event_form_id;
 	}
@@ -185,8 +186,8 @@ class Extend_Gravity_Form {
 			return $this->booked_reservations;
 		}
 
-		$meta_key = self::EVENT_ID_DB_KEY;
-		$field_ids    = array_column(
+		$meta_key  = self::EVENT_ID_DB_KEY;
+		$field_ids = array_column(
 			(array) $this->event_form_settings,
 			'field_id'
 		);
@@ -225,8 +226,6 @@ class Extend_Gravity_Form {
 	/**
 	 * Returns the number of available registration slots for the given event.
 	 *
-	 * @param mixed $event_id Post ID for the event.
-	 *
 	 * @return array
 	 */
 	protected function get_available_reservations() {
@@ -242,8 +241,8 @@ class Extend_Gravity_Form {
 		$booked_reservations = $this->get_booked_reservations();
 
 		foreach ( $this->get_max_reservations() as $index => $max ) {
-			$booked                                 = isset( $this->get_booked_reservations()[ $index ] ) ? $this->get_booked_reservations()[ $index ] : 0;
-			$this->available_reservations[ $index ] = max( 0, ( $max - $booked ) );
+			$booked                               = isset( $this->get_booked_reservations()[$index] ) ? $this->get_booked_reservations()[$index] : 0;
+			$this->available_reservations[$index] = max( 0, ( $max - $booked ) );
 		}
 
 		return $this->available_reservations;
@@ -273,7 +272,7 @@ class Extend_Gravity_Form {
 			add_filter( "gform_field_validation_{$form_id}_{$field_id}", [ $this, 'validate_reservation_request' ], 10, 4 );
 		}
 
-		add_filter( 'gform_entry_meta', [ $this, 'add_entry_meta' ], 10, 2);
+		add_filter( 'gform_entry_meta', [ $this, 'add_entry_meta' ], 10, 2 );
 
 		add_filter( 'gform_replace_merge_tags', [ $this, 'replace_event_info_merge_tag' ], 10, 3 );
 	}
@@ -287,7 +286,7 @@ class Extend_Gravity_Form {
 	 */
 	public function insert_registration_notice( $form ) {
 		$form_meta = get_post_meta( $this->get_post_id(), 'ecgf_form_meta', true );
-		$notice = empty( $form_meta[0]['notice'] ) ? '' : $form_meta[0]['notice'];
+		$notice    = empty( $form_meta[0]['notice'] ) ? '' : $form_meta[0]['notice'];
 
 		$insert_above_field = isset( $this->get_event_form_settings()[0]['field_id'] ) ? $this->get_event_form_settings()[0]['field_id'] : null;
 
@@ -297,6 +296,7 @@ class Extend_Gravity_Form {
 		 * @param string $insert_above_field The ID of the field where the notice will be displayed.
 		 * @param array  $form               Gravity Form object.
 		 * @param string $notice             The notice that will be displayed.
+		 *
 		 * @return string
 		 */
 		$insert_above_field = apply_filters( 'ecgf_form_notice_position', $insert_above_field, $form, $notice );
@@ -349,12 +349,11 @@ class Extend_Gravity_Form {
 			$value = array_filter( $value );
 
 			if ( ! empty( $value ) ) {
-				$keys = array_keys( $value );
-				$available_reservations = isset( $this->get_available_reservations()[ $keys[0] ] ) ? $this->get_available_reservations()[ $keys[0] ] : null;
+				$keys                   = array_keys( $value );
+				$available_reservations = isset( $this->get_available_reservations()[$keys[0]] ) ? $this->get_available_reservations()[$keys[0]] : null;
 			}
-
 		} else {
-			$available_reservations = isset( $this->get_available_reservations()[ $field->id ] ) ? $this->get_available_reservations()[ $field->id ] : null;
+			$available_reservations = isset( $this->get_available_reservations()[$field->id] ) ? $this->get_available_reservations()[$field->id] : null;
 		}
 
 		if ( is_null( $available_reservations ) ) {
@@ -375,11 +374,12 @@ class Extend_Gravity_Form {
 		/**
 		 * Filter the validation result.
 		 *
-		 * @param array  $result Validation result.
-		 * @param int $available_reservations Number of available reservations.
-		 * @param string $value  Form field value.
-		 * @param array  $form   Form The current form to be filtered.
-		 * @param object $field  Form field data.
+		 * @param array  $result                 Validation result.
+		 * @param int    $available_reservations Number of available reservations.
+		 * @param string $value                  Form field value.
+		 * @param array  $form                   Form The current form to be filtered.
+		 * @param object $field                  Form field data.
+		 *
 		 * @return array
 		 */
 		$result = apply_filters( 'ecgf_field_validation_result', $result, $available_reservations, $value, $form, $field );
@@ -406,7 +406,7 @@ class Extend_Gravity_Form {
 			'update_entry_meta_callback' => function () {
 				return $this->get_post_id();
 			},
-			'is_default_column'          => true
+			'is_default_column'          => true,
 		);
 
 		return $entry_meta;
@@ -415,9 +415,9 @@ class Extend_Gravity_Form {
 	/**
 	 * Replaces the merge tag {event_info}.
 	 *
-	 * @param string $text The current text in which merge tags are being replaced.
-	 * @param array $form The current form.
-	 * @param array $entry The current entry.
+	 * @param string $text  The current text in which merge tags are being replaced.
+	 * @param array  $form  The current form.
+	 * @param array  $entry The current entry.
 	 *
 	 * @return string
 	 */
@@ -439,8 +439,9 @@ class Extend_Gravity_Form {
 			return $text;
 		}
 
-		$event_info = sprintf( '<a href="%s">%s</a>', get_the_permalink( $event_id ),
-			$event_id . ' - ' .  get_the_title( $event_id )
+		$event_info = sprintf(
+			'<a href="%s">%s</a>', get_the_permalink( $event_id ),
+			$event_id . ' - ' . get_the_title( $event_id )
 		);
 
 		$text = str_replace( $custom_merge_tag, $event_info, $text );
@@ -462,7 +463,7 @@ class Extend_Gravity_Form {
 		$values = array_column( (array) $array, $value );
 
 		// Array combine requires arrays of equal size.
-		if ( count( (array) $keys) !== count( (array) $values ) ) {
+		if ( count( (array) $keys ) !== count( (array) $values ) ) {
 			return null;
 		}
 
@@ -485,8 +486,8 @@ class Extend_Gravity_Form {
 
 		$search_replace = [];
 		for ( $i = 0; $i < $number_of_fields; $i ++ ) {
-			$search = '{field_' . ( $i + 1 ). '}';
-			$replace = $remaining_slots[$i];
+			$search                  = '{field_' . ( $i + 1 ) . '}';
+			$replace                 = $remaining_slots[$i];
 			$search_replace[$search] = $replace;
 		}
 
@@ -502,6 +503,7 @@ class Extend_Gravity_Form {
 		 * @param string $updated_message Form notice that will be displayed to the user.
 		 * @param string $message         Original notice before it was updated.
 		 * @param array  $search_replace  Array of search replace pairs.
+		 *
 		 * @return string
 		 */
 		$updated_message = apply_filters( 'ecgf_form_notice_text', $updated_message, $message, $search_replace );
@@ -510,13 +512,14 @@ class Extend_Gravity_Form {
 		 * Filter the notice markup.
 		 *
 		 * @param array Opening and Closing markup for the form notice.
+		 *
 		 * @return array
 		 */
 		$markup = apply_filters(
 			'ecgf_form_notice_markup',
 			[
 				'open'  => '<span>',
-				'close' => '</span>'
+				'close' => '</span>',
 			]
 		);
 
