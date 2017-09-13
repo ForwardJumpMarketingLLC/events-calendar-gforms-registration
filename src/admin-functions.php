@@ -46,24 +46,11 @@ function enqueue_assets() {
 }
 
 /**
- * Checks if Gravity Forms is active.
- *
- * @return bool
- */
-function is_gf_active() {
-	return (bool) class_exists( 'GFForms' );
-}
-
-/**
  * Returns an array of the registered Gravity Forms.
  *
  * @return array
  */
 function get_forms() {
-	if ( ! class_exists( 'GFForms' ) ) {
-		return [];
-	}
-
 	$forms_array = \GFFormsModel::get_forms();
 
 	$forms_list = [ 'null' => 'None selected' ];
@@ -77,7 +64,7 @@ function get_forms() {
 /**
  * Get the GF fields from the selected form
  *
- * @param $field    CMB2 field
+ * @param object $field CMB2 field object.
  *
  * @return array|bool
  */
@@ -142,7 +129,7 @@ function get_form_field_options( $form_id ) {
 	return $options;
 }
 
-add_filter( 'gform_entry_meta', __NAMESPACE__ . '\\modify_entry_meta', 10, 2);
+add_filter( 'gform_entry_meta', __NAMESPACE__ . '\\modify_entry_meta', 10, 2 );
 /**
  * Modifies the entry meta if the form has been designated as a registration form.
  *
@@ -151,7 +138,7 @@ add_filter( 'gform_entry_meta', __NAMESPACE__ . '\\modify_entry_meta', 10, 2);
  *
  * @return array
  */
-function modify_entry_meta( $entry_meta, $form_id ){
+function modify_entry_meta( $entry_meta, $form_id ) {
 	if ( ! is_event_registration_form( $form_id ) ) {
 		return $entry_meta;
 	}
@@ -190,14 +177,6 @@ function add_event_id_field_to_form_meta( $form ) {
 	return $form;
 }
 
-add_filter( 'gform_get_input_value', function( $value, $lead, $field ) {
-	if ( 'event_id' !== $field->id ) {
-		return $value;
-	}
-
-	return event_info_output( $value );
-}, 10, 3);
-
 add_filter( 'gform_entries_column_filter', __NAMESPACE__ . '\\change_column_data', 10, 5 );
 /**
  * Changes how the 'event_id' meta value is rendered.
@@ -213,7 +192,6 @@ add_filter( 'gform_entries_column_filter', __NAMESPACE__ . '\\change_column_data
  * @return string
  */
 function change_column_data( $value, $form_id, $field_id, $entry, $query_string ) {
-
 	if ( 'event_id' !== $field_id ) {
 		return $value;
 	}
@@ -241,6 +219,22 @@ function event_info_output( $event_id, $link = true ) {
 	}
 
 	return sprintf( '<a href="%s">%s</a>', get_edit_post_link( $event_id ), $info );
+}
+
+add_filter( 'gform_entry_field_value', __NAMESPACE__ . '\\modify_entry_event_id_field_value', 10, 4 );
+/**
+ * @param string $value The current entry value to be filtered.
+ * @param object $field The field from which the entry value was submitted.
+ * @param array $lead The current entry.
+ * @param array $form The form from which the entry value was submitted.
+ * @return string
+ */
+function modify_entry_event_id_field_value( $value, $field, $lead, $form ) {
+	if ( isset( $field['id'] ) && 'event_id' === $field['id'] ) {
+		$value = event_info_output( $value, true );
+	}
+
+	return $value;
 }
 
 add_filter( 'gform_export_field_value', __NAMESPACE__ . '\\modify_exported_event_value', 10, 4 );
@@ -300,44 +294,6 @@ function is_event_registration_form( $form_id ) {
 	$form_ids = get_registration_form_ids();
 
 	return in_array( $form_id, $form_ids );
-}
-
-add_filter( 'gform_entry_detail_meta_boxes', __NAMESPACE__ . '\\add_event_info_meta_box', 10, 3 );
-/**
- * Adds an event info meta box to the appropriate entries.
- *
- * @param array $meta_boxes Meta box properties.
- * @param array $entry      The entry currently being viewed/edited.
- * @param array $form       The form object used to process the current entry.
- *
- * @return array
- */
-function add_event_info_meta_box( $meta_boxes, $entry, $form ) {
-
-	if ( isset( $entry['event_id'] ) ) {
-		$meta_boxes['event_info'] = [
-			'title'         => esc_html__( 'Event Info', 'events-calendar-gforms-registration' ),
-			'callback'      => __NAMESPACE__ . '\\entry_meta_meta_box_callback',
-			'context'       => 'normal',
-			'callback_args' => [ $entry, $form ],
-		];
-	}
-
-	return $meta_boxes;
-}
-
-/**
- * Render the event_id if it is available.
- *
- * @param array $entry Current entry.
- * @param array $form  Current form.
- *
- * @return void
- */
-function entry_meta_meta_box_callback( $entry, $form ) {
-	if ( isset( $entry['entry']['event_id'] ) ) {
-		echo event_info_output( $entry['entry']['event_id'] );
-	}
 }
 
 add_action( 'gform_admin_pre_render', __NAMESPACE__ . '\\add_event_info_merge_tag' );
