@@ -3,7 +3,7 @@
  * CMB2 Post Metaboxes
  *
  * @package     ForwardJump\ECGF_Registration
- * @author      Tim Jensen <tim@forwardjump.com>
+ * @author      Tim Jensen <info@forwardjump.com>
  * @license     GNU General Public License 2.0+
  * @link        https://forwardjump.com
  * @since       0.1.0

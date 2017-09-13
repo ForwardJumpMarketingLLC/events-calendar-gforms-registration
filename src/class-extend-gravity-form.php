@@ -3,7 +3,7 @@
  * Extend a Gravity Forms form.
  *
  * @package     ForwardJump\ECGF_Registration
- * @author      Tim Jensen <tim@timjensen.us>
+ * @author      Tim Jensen <info@forwardjump.com>
  * @license     GNU General Public License 2.0+
  * @link        https://www.timjensen.us
  * @since       0.1.0
