@@ -20,12 +20,8 @@ class ECGF_Frontend extends \WP_UnitTestCase {
 
 	public $form_settings = [];
 
-
 	public function setUp() {
 		parent::setUp();
-
-		require_once dirname( dirname( __DIR__ ) ) . '/the-events-calendar/the-events-calendar.php';
-		require_once dirname( dirname( __DIR__ ) ) . '/gravityforms/gravityforms.php';
 
 		load_frontend_files();
 
@@ -49,11 +45,6 @@ class ECGF_Frontend extends \WP_UnitTestCase {
 		$post = get_post( $this->post_id );
 
 		setup_postdata( $post );
-	}
-
-	function test_dependencies() {
-		$this->assertTrue( class_exists( 'Tribe__Events__Main' ) );
-		$this->assertTrue( class_exists( 'GFForms' ) );
 	}
 
 	function test_correct_post_object() {
