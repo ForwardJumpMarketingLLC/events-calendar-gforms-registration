@@ -89,7 +89,10 @@ class Extend_Gravity_Form {
 	 * @return bool
 	 */
 	public function set_properties() {
-		if ( ! tribe_is_event() || tribe_is_past_event() ) {
+		if (
+			function_exists( 'tribe_is_event' ) && ! tribe_is_event() ||
+			function_exists( 'tribe_is_past_event' ) && tribe_is_past_event()
+		) {
 			return false;
 		}
 
@@ -113,7 +116,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return null|int
 	 */
-	protected function get_post_id() {
+	public function get_post_id() {
 		if ( ! $this->post_id ) {
 			$this->post_id = get_the_ID();
 		}
@@ -126,7 +129,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return null|string
 	 */
-	protected function get_event_form_id() {
+	public function get_event_form_id() {
 		if ( ! $this->event_form_id ) {
 			$this->set_event_form_id();
 		}
@@ -152,7 +155,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return null|array
 	 */
-	protected function get_event_form_settings() {
+	public function get_event_form_settings() {
 		if ( ! $this->event_form_settings ) {
 			$this->event_form_settings = get_post_meta( $this->get_post_id(), 'ecgf_form_settings', true );
 		}
@@ -165,7 +168,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return array
 	 */
-	protected function get_max_reservations() {
+	public function get_max_reservations() {
 		if ( ! empty( $this->max_reservations ) ) {
 			return $this->max_reservations;
 		}
@@ -180,7 +183,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return array
 	 */
-	protected function get_booked_reservations() {
+	public function get_booked_reservations() {
 
 		if ( $this->booked_reservations ) {
 			return $this->booked_reservations;
@@ -228,7 +231,7 @@ class Extend_Gravity_Form {
 	 *
 	 * @return array
 	 */
-	protected function get_available_reservations() {
+	public function get_available_reservations() {
 
 		if ( $this->available_reservations ) {
 			return $this->available_reservations;
@@ -241,8 +244,8 @@ class Extend_Gravity_Form {
 		$booked_reservations = $this->get_booked_reservations();
 
 		foreach ( $this->get_max_reservations() as $index => $max ) {
-			$booked                               = isset( $this->get_booked_reservations()[$index] ) ? $this->get_booked_reservations()[$index] : 0;
-			$this->available_reservations[$index] = max( 0, ( $max - $booked ) );
+			$booked                                 = isset( $this->get_booked_reservations()[ $index ] ) ? $this->get_booked_reservations()[ $index ] : 0;
+			$this->available_reservations[ $index ] = max( 0, ( $max - $booked ) );
 		}
 
 		return $this->available_reservations;
@@ -251,22 +254,26 @@ class Extend_Gravity_Form {
 	/**
 	 * Hook into the appropriate Gravity Form.
 	 *
-	 * @return void
+	 * @return bool
 	 */
 	public function gform_hooks() {
-		if ( ! tribe_is_event() || tribe_is_past_event() ) {
-			return;
+		if (
+			function_exists( 'tribe_is_event' ) && ! tribe_is_event() ||
+			function_exists( 'tribe_is_past_event' ) && tribe_is_past_event()
+		) {
+			return false;
 		}
 
 		$form_id = $this->get_event_form_id();
 
 		if ( ! $form_id ) {
-			return;
+			return false;
 		}
 
 		add_filter( "gform_pre_render_{$form_id}", [ $this, 'insert_registration_notice' ] );
 
 		$field_ids = array_column( $this->get_event_form_settings(), 'field_id' );
+
 		foreach ( (array) $field_ids as $field ) {
 			$field_id = floor( $field );
 			add_filter( "gform_field_validation_{$form_id}_{$field_id}", [ $this, 'validate_reservation_request' ], 10, 4 );
@@ -350,10 +357,10 @@ class Extend_Gravity_Form {
 
 			if ( ! empty( $value ) ) {
 				$keys                   = array_keys( $value );
-				$available_reservations = isset( $this->get_available_reservations()[$keys[0]] ) ? $this->get_available_reservations()[$keys[0]] : null;
+				$available_reservations = isset( $this->get_available_reservations()[ $keys[0] ] ) ? $this->get_available_reservations()[ $keys[0] ] : null;
 			}
 		} else {
-			$available_reservations = isset( $this->get_available_reservations()[$field->id] ) ? $this->get_available_reservations()[$field->id] : null;
+			$available_reservations = isset( $this->get_available_reservations()[ $field->id ] ) ? $this->get_available_reservations()[ $field->id ] : null;
 		}
 
 		if ( is_null( $available_reservations ) ) {
@@ -400,14 +407,14 @@ class Extend_Gravity_Form {
 			return $entry_meta;
 		}
 
-		$entry_meta['event_id'] = array(
+		$entry_meta['event_id'] = [
 			'label'                      => 'Event Info',
 			'is_numeric'                 => true,
 			'update_entry_meta_callback' => function () {
 				return $this->get_post_id();
 			},
 			'is_default_column'          => true,
-		);
+		];
 
 		return $entry_meta;
 	}
@@ -496,9 +503,9 @@ class Extend_Gravity_Form {
 
 		$search_replace = [];
 		for ( $i = 0; $i < $number_of_fields; $i ++ ) {
-			$search                  = '{field_' . ( $i + 1 ) . '}';
-			$replace                 = $remaining_slots[$i];
-			$search_replace[$search] = $replace;
+			$search                    = '{field_' . ( $i + 1 ) . '}';
+			$replace                   = $remaining_slots[ $i ];
+			$search_replace[ $search ] = $replace;
 		}
 
 		$updated_message = str_replace(
@@ -525,8 +532,7 @@ class Extend_Gravity_Form {
 		 *
 		 * @return array
 		 */
-		$markup = apply_filters(
-			'ecgf_form_notice_markup',
+		$markup = apply_filters( 'ecgf_form_notice_markup',
 			[
 				'open'  => '<span>',
 				'close' => '</span>',
