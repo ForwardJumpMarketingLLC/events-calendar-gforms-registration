@@ -3,16 +3,21 @@
  * Plugin Name: Events Calendar GForms Registration
  * Plugin URI:  https://github.com/ForwardJumpMarketingLLC/events-calendar-gforms-registration
  * Description: Use Gravity Forms to handle registration for The Events Calendar events.
- * Author:      Tim Jensen
+ * Version:     0.2.0
+ * Author:      ForwardJump
  * Author URI:  https://forwardjump.com
+ *
+ * License:     GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * Text Domain: events-calendar-gforms-registration
  * Domain Path: /languages
- * License:     GPLv2 or later
- * Version:     0.1.5
+ *
+ * Requires PHP: 7.0
  *
  * GitHub Plugin URI: https://github.com/ForwardJumpMarketingLLC/events-calendar-gforms-registration
  *
- * @package         ForwardJump\ECGF_Registration
+ * @package ForwardJump\ECGF_Registration
  */
 
 namespace ForwardJump\ECGF_Registration;
@@ -36,7 +41,11 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\\init', 5 );
  */
 function init() {
 
-	if ( ! class_exists( 'Tribe__Events__Main' ) || ! class_exists( 'GFForms' ) ) {
+	if (
+		! class_exists( 'Tribe__Events__Main' ) ||
+		! class_exists( 'GFForms' ) ||
+		version_compare( PHP_VERSION, '7.0.0', '<' )
+	) {
 
 		add_action( 'admin_notices', __NAMESPACE__ . '\\activation_error_notice' );
 		add_action( 'admin_init', __NAMESPACE__ . '\\deactivate_plugin' );
@@ -87,13 +96,24 @@ function activation_error_notice() {
 
 	$plugin_data = get_plugin_data( ECGF_PATH );
 
-	?>
-	<div class="notice notice-error is-dismissible">
-		<p>Error activating
-			<b><?php echo esc_html( isset( $plugin_data['Name'] ) ? $plugin_data['Name'] : 'plugin' ); ?></b>. Please
-			activate The Events Calendar and Gravity Forms plugins, then try again.</p>
-	</div>
-	<?php
+	if ( ! class_exists( 'Tribe__Events__Main' ) || ! class_exists( 'GFForms' ) ) {
+		?>
+		<div class="notice notice-error is-dismissible">
+			<p>Error activating
+				<b><?php echo esc_html( isset( $plugin_data['Name'] ) ? $plugin_data['Name'] : 'plugin' ); ?></b>. Please
+				activate The Events Calendar and Gravity Forms plugins, then try again.</p>
+		</div>
+		<?php
+	}
+
+	if ( version_compare( PHP_VERSION, '7.0.0', '<' ) ) {
+		?>
+		<div class="notice notice-error is-dismissible">
+			<p>Error activating
+				<b><?php echo esc_html( isset( $plugin_data['Name'] ) ? $plugin_data['Name'] : 'plugin' ); ?></b>. This plugin requires a minimum PHP version of 7.0.0.</p>
+		</div>
+		<?php
+	}
 }
 
 /**
