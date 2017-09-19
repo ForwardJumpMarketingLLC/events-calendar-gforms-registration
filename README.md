@@ -1,6 +1,6 @@
 # Gravity Forms Registration for The Events Calendar
 
-This plugin allows you to use Gravity Forms to handle registration for The Events Calendar events. Forms can be reused for multiple events without conflict.
+This plugin allows you to use Gravity Forms to create advanced and sophisticated registration forms for The Events Calendar events. Forms can be reused for multiple events without conflict.
 
 ## Requirements
 - PHP 7.0+
