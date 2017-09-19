@@ -37,7 +37,7 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_assets' );
  * @return void
  */
 function enqueue_assets() {
-	if ( 'tribe_events' !== get_post_type() ) {
+	if ( get_post_type() !== 'tribe_events' ) {
 		return;
 	}
 
@@ -160,7 +160,7 @@ add_filter( 'gform_form_post_get_meta', __NAMESPACE__ . '\\add_event_id_field_to
  * @return array
  */
 function add_event_id_field_to_form_meta( $form ) {
-	if ( 'gf_edit_forms' === rgget( 'page' ) || ! is_event_registration_form( $form['id'] ) ) {
+	if ( rgget( 'page' ) === 'gf_edit_forms' || ! is_event_registration_form( $form['id'] ) ) {
 		return $form;
 	}
 
